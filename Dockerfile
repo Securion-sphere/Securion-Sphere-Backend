@@ -14,7 +14,7 @@ RUN \
     fi
 
 FROM base AS builder
-
+ENV NODE_ENV=production
 COPY . .
 COPY --from=dependencies /app/node_modules ./node_modules
 RUN \
