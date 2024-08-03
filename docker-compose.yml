@@ -1,0 +1,35 @@
+services:
+  securion-sphere-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: securion-sphere-backend
+    restart: unless-stopped
+    ports:
+      - ${APP_PORT}:${APP_PORT}
+    networks:
+      - network-backend
+    env_file:
+      - .env
+  postgres:
+    image: postgres
+    container_name: postgres
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=${DB_USER}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+      - POSTGRES_DB=${DB_NAME}
+    ports:
+      - 5432:5432
+    networks:
+      - network-backend
+
+networks:
+  network-backend:
+    driver: bridge
+    name: network-backend
+
+volumes:
+  postgres_data:

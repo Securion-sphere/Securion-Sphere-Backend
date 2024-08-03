@@ -1,0 +1,3 @@
+echo "Running commitlint"
+
+npx --no-install commitlint --edit "$1"
