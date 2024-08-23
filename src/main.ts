@@ -1,8 +1,8 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
-import { ConfigService } from '@nestjs/config';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { NestExpressApplication } from '@nestjs/platform-express';
+import { NestFactory } from "@nestjs/core";
+import { AppModule } from "./app.module";
+import { ConfigService } from "@nestjs/config";
+import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
+import { NestExpressApplication } from "@nestjs/platform-express";
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -16,20 +16,20 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  if (nodeEnv !== 'production') {
+  if (nodeEnv !== "production") {
     const swaggerConfig = new DocumentBuilder()
-      .setTitle('SecurionSphere API')
-      .setDescription('SecurionSphere API')
-      .setVersion('1.0')
+      .setTitle("SecurionSphere API")
+      .setDescription("SecurionSphere API")
+      .setVersion("1.0")
       .addBearerAuth()
-      .addTag('SecurionSphere API')
+      .addTag("SecurionSphere API")
       .build();
     const document = SwaggerModule.createDocument(app, swaggerConfig);
 
-    SwaggerModule.setup('document', app, document);
+    SwaggerModule.setup("document", app, document);
   }
 
-  const port = configService.get<number>('app.port');
+  const port = configService.get<number>("app.port");
   await app.listen(port);
 }
 bootstrap();

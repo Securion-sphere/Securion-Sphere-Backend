@@ -4,8 +4,8 @@ import {
   JoinColumn,
   OneToOne,
   PrimaryGeneratedColumn,
-} from 'typeorm';
-import { User } from './user.entity';
+} from "typeorm";
+import { User } from "./user.entity";
 
 @Entity()
 export class Student {
@@ -13,7 +13,7 @@ export class Student {
   id: number;
 
   @OneToOne(() => User)
-  @JoinColumn({ name: 'studentId' })
+  @JoinColumn({ name: "studentId" })
   user: User;
 
   @Column()

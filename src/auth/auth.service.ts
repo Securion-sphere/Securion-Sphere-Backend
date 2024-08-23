@@ -1,11 +1,11 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { CreateUserDto } from 'src/user/dto/create-user.dto';
-import { UserService } from 'src/user/user.service';
-import { AuthJwtPayload } from './types/auth-jwtPayload';
-import refreshJwtCofig from 'src/config/refresh-jwt.cofig';
-import { ConfigType } from '@nestjs/config';
-import * as argon2 from 'argon2';
+import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import { CreateUserDto } from "src/user/dto/create-user.dto";
+import { UserService } from "src/user/user.service";
+import { AuthJwtPayload } from "./types/auth-jwtPayload";
+import refreshJwtCofig from "src/config/refresh-jwt.cofig";
+import { ConfigType } from "@nestjs/config";
+import * as argon2 from "argon2";
 @Injectable()
 export class AuthService {
   constructor(
@@ -44,14 +44,14 @@ export class AuthService {
   async validateRefreshToken(userId: number, refreshToken: string) {
     const user = await this.userService.findOne(userId);
     if (!user || !user.hashedRefreshToken)
-      throw new UnauthorizedException('Invalid Refresh Token');
+      throw new UnauthorizedException("Invalid Refresh Token");
 
     const refreshTokenMatches = await argon2.verify(
       user.hashedRefreshToken,
       refreshToken,
     );
     if (!refreshTokenMatches)
-      throw new UnauthorizedException('Invalid Refresh Token');
+      throw new UnauthorizedException("Invalid Refresh Token");
 
     return { id: userId };
   }
