@@ -1,9 +1,9 @@
-import { InjectRepository } from '@nestjs/typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
-import { Repository } from 'typeorm';
-import { User } from 'src/entities/user.entity';
-import { Injectable } from '@nestjs/common';
+import { InjectRepository } from "@nestjs/typeorm";
+import { CreateUserDto } from "./dto/create-user.dto";
+import { UpdateUserDto } from "./dto/update-user.dto";
+import { Repository } from "typeorm";
+import { User } from "src/entities/user.entity";
+import { Injectable } from "@nestjs/common";
 
 @Injectable()
 export class UserService {
@@ -29,7 +29,7 @@ export class UserService {
   findOne(id: number) {
     return this.UserRepo.findOne({
       where: { id },
-      select: ['firstName', 'lastName', 'profile_img', 'hashedRefreshToken'],
+      select: ["firstName", "lastName", "profile_img", "hashedRefreshToken"],
     });
   }
 

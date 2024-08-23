@@ -5,7 +5,7 @@ import { RefreshAuthGuard } from './guards/refresh-auth/refresh-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
 import { ConfigService } from '@nestjs/config';
 
-@Controller('auth')
+@Controller("auth")
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
@@ -13,11 +13,11 @@ export class AuthController {
   ) {}
 
   @UseGuards(GoogleAuthGuard)
-  @Get('google/login')
+  @Get("google/login")
   googleLogin() {}
 
   @UseGuards(GoogleAuthGuard)
-  @Get('google/callback')
+  @Get("google/callback")
   async googleCallback(@Req() req, @Res() res) {
     const response = await this.authService.login(req.user.id);
 
@@ -29,13 +29,13 @@ export class AuthController {
   }
 
   @UseGuards(RefreshAuthGuard)
-  @Post('refresh')
+  @Post("refresh")
   refreshToken(@Req() req) {
     return this.authService.refreshToken(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('logout')
+  @Post("logout")
   logout(@Req() req) {
     this.authService.logout(req.user.id);
   }

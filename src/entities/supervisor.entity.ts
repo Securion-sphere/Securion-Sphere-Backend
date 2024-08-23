@@ -5,9 +5,9 @@ import {
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
-} from 'typeorm';
-import { User } from './user.entity';
-import { Lab } from './lab.entity';
+} from "typeorm";
+import { User } from "./user.entity";
+import { Lab } from "./lab.entity";
 
 @Entity()
 export class Supervisor {
@@ -15,7 +15,7 @@ export class Supervisor {
   id: number;
 
   @OneToOne(() => User)
-  @JoinColumn({ name: 'userId' })
+  @JoinColumn({ name: "userId" })
   user: User;
 
   @Column()
