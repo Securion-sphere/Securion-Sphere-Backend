@@ -1,5 +1,6 @@
 import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Student } from './student.entity';
+import { Supervisor } from './supervisor.entity';
 
 @Entity()
 export class User {
@@ -29,4 +30,7 @@ export class User {
 
   @OneToOne(() => Student, (student) => student.user)
   student: Student;
+
+  @OneToOne(() => Supervisor, (supervisor) => supervisor.user)
+  supervisor: Supervisor;
 }
