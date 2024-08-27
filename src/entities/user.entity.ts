@@ -25,7 +25,7 @@ export class User {
   @Column()
   email: string;
 
-  @Column()
+  @Column({ default: 0 })
   actived_machine: number;
 
   @OneToOne(() => Student, (student) => student.user)
