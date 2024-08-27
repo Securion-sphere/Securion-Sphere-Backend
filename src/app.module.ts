@@ -20,7 +20,7 @@ import { AuthModule } from './auth/auth.module';
         username: configService.get<string>('db.user'),
         password: configService.get<string>('db.pass'),
         database: configService.get<string>('db.name'),
-        entities: [],
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: true,
       }),
     }),
