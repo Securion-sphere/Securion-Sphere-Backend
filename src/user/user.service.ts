@@ -29,7 +29,7 @@ export class UserService {
   findOne(id: number) {
     return this.UserRepo.findOne({
       where: { id },
-      select: ['firstName', 'lastName', 'profile_img'],
+      select: ['firstName', 'lastName', 'profile_img', 'hashedRefreshToken'],
     });
   }
 
@@ -40,5 +40,9 @@ export class UserService {
 
   remove(id: number) {
     return `This action removes a #${id} user`;
+  }
+
+  async updateHashedRefreshToken(userId: number, hashedRefreshToken: string) {
+    return await this.UserRepo.update({ id: userId }, { hashedRefreshToken });
   }
 }

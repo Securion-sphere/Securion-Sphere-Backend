@@ -13,20 +13,23 @@ export class User {
   @Column()
   lastName: string;
 
-  @Column()
+  @Column({ nullable: true })
   nickName: string;
 
   @Column()
   profile_img: string;
 
-  @Column()
-  googleId: string;
+  // @Column()
+  // googleId: string;
 
   @Column()
   email: string;
 
   @Column({ default: 0 })
   actived_machine: number;
+
+  @Column({ nullable: true })
+  hashedRefreshToken: string;
 
   @OneToOne(() => Student, (student) => student.user)
   student: Student;
