@@ -16,7 +16,11 @@ export class AuthController {
   @Get('google/callback')
   async googleCallback(@Req() req, @Res() res) {
     const response = await this.authService.login(req.user.id);
-    res.redirect(`http://localhost:5001?token=${response.accessToken}`); // frontend URL
+    res.cookie('jwt', response.accessToken, {
+      httpOnly: true, // prevents JavaScript access
+      secure: true, // ensures the cookie is only sent over HTTPS
+    });
+    res.redirect('http://localhost:3000'); // redirect to home page
   }
 
   @UseGuards(RefreshAuthGuard)
