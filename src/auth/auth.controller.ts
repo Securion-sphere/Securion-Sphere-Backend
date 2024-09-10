@@ -3,10 +3,14 @@ import { GoogleAuthGuard } from './guards/google-auth/google-auth.guard';
 import { AuthService } from './auth.service';
 import { RefreshAuthGuard } from './guards/refresh-auth/refresh-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @UseGuards(GoogleAuthGuard)
   @Get('google/login')
@@ -16,11 +20,12 @@ export class AuthController {
   @Get('google/callback')
   async googleCallback(@Req() req, @Res() res) {
     const response = await this.authService.login(req.user.id);
-    res.cookie('jwt', response.accessToken, {
+    // console.log(response.accessToken);
+    res.cookie('AccessToken', response.accessToken, {
       httpOnly: true, // prevents JavaScript access
       secure: true, // ensures the cookie is only sent over HTTPS
     });
-    res.redirect('http://localhost:3000'); // redirect to home page
+    res.redirect(`${this.configService.get<string>('frontendUrl')}`);
   }
 
   @UseGuards(RefreshAuthGuard)
