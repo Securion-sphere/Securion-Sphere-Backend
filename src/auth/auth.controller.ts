@@ -20,12 +20,20 @@ export class AuthController {
   @Get('google/callback')
   async googleCallback(@Req() req, @Res() res) {
     const response = await this.authService.login(req.user.id);
-    // console.log(response.accessToken);
+
     res.cookie('AccessToken', response.accessToken, {
-      httpOnly: true, // prevents JavaScript access
-      secure: true, // ensures the cookie is only sent over HTTPS
+      httpOnly: true,
+      secure: true,
+      sameSite: 'Strict',
     });
-    res.redirect(`${this.configService.get<string>('frontendUrl')}`);
+
+    res.cookie('RefreshToken', response.refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: 'Strict',
+    });
+
+    res.status(200).json({ message: 'Login successful' });
   }
 
   @UseGuards(RefreshAuthGuard)

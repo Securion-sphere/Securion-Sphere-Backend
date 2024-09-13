@@ -10,10 +10,10 @@ async function bootstrap() {
   const nodeEnv = configService.get<string>('NODE_ENV');
 
   app.enableCors({
-    origin: `${configService.get<string>('frontendUrl')}`, // Your frontend URL
-    credentials: true, // Allow cookies and credentials to be sent
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'], // Specify allowed methods
-    allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
+    origin: `${configService.get<string>('frontendUrl')}`,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
   if (nodeEnv !== 'production') {
