@@ -16,12 +16,12 @@ export class AuthService {
   ) {}
 
   async login(userId: number) {
-    // const payload: AuthJwtPayload = { sub: userId };
-    // const token = this.jwtService.sign(payload);
-    // const refreshToken = this.jwtService.sign(payload, this.refreshTokenConfig);
     const { accessToken, refreshToken } = await this.generateTokens(userId);
     const hashedRefreshToken = await argon2.hash(refreshToken);
     await this.userService.updateHashedRefreshToken(userId, hashedRefreshToken);
+    console.log(
+      `userId: ${userId}\naccessToken: ${accessToken}\nrefreshToken: ${refreshToken}`,
+    );
     return {
       id: userId,
       accessToken,

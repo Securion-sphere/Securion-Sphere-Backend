@@ -3,10 +3,14 @@ import { GoogleAuthGuard } from './guards/google-auth/google-auth.guard';
 import { AuthService } from './auth.service';
 import { RefreshAuthGuard } from './guards/refresh-auth/refresh-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
+import { ConfigService } from '@nestjs/config';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
 
   @UseGuards(GoogleAuthGuard)
   @Get('google/login')
@@ -16,7 +20,12 @@ export class AuthController {
   @Get('google/callback')
   async googleCallback(@Req() req, @Res() res) {
     const response = await this.authService.login(req.user.id);
-    res.redirect(`http://localhost:5001?token=${response.accessToken}`); // frontend URL
+
+    // Redirect to the frontend with tokens in the query params
+    const frontendUrl = this.configService.get<string>('frontendUrl');
+    res.redirect(
+      `${frontendUrl}/?accessToken=${response.accessToken}&refreshToken=${response.refreshToken}`,
+    );
   }
 
   @UseGuards(RefreshAuthGuard)
