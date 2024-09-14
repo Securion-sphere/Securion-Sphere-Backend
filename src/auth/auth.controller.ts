@@ -21,19 +21,11 @@ export class AuthController {
   async googleCallback(@Req() req, @Res() res) {
     const response = await this.authService.login(req.user.id);
 
-    res.cookie('AccessToken', response.accessToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'Strict',
-    });
-
-    res.cookie('RefreshToken', response.refreshToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'Strict',
-    });
-
-    res.status(200).json({ message: 'Login successful' });
+    // Redirect to the frontend with tokens in the query params
+    const frontendUrl = this.configService.get<string>('frontendUrl');
+    res.redirect(
+      `${frontendUrl}/?accessToken=${response.accessToken}&refreshToken=${response.refreshToken}`,
+    );
   }
 
   @UseGuards(RefreshAuthGuard)
