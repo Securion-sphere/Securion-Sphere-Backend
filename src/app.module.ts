@@ -7,6 +7,7 @@ import dbConfig from './config/db.config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
+import { LabModule } from './lab/lab.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { UserModule } from './user/user.module';
     }),
     AuthModule,
     UserModule,
+    LabModule,
   ],
   controllers: [AppController],
   providers: [AppService],
