@@ -3,24 +3,24 @@ import { Supervisor } from "./supervisor.entity";
 
 @Entity()
 export class Lab {
-    @PrimaryGeneratedColumn()
-    id: number;
+  @PrimaryGeneratedColumn()
+  id: number;
 
-    @Column({ type: 'text', unique: true })
-    name: string;
+  @Column({ type: "text", unique: true })
+  name: string;
 
-    @Column({ type: 'text' })
-    description: string;
+  @Column({ type: "text" })
+  description: string;
 
-    @Column({ type: 'smallint'})
-    point: number;
+  @Column({ type: "smallint" })
+  point: number;
 
-    @Column({ type: 'text'})
-    category: string;
+  @Column({ type: "text" })
+  category: string;
 
-    @OneToMany(() => Supervisor, (supervisor) => supervisor.user)
-    creator: Supervisor;
+  @OneToMany(() => Supervisor, (supervisor) => supervisor.user)
+  creator: Supervisor;
 
-    @Column({ type: 'boolean', default: false })
-    isActive: boolean;
+  @Column({ type: "boolean", default: false })
+  isActive: boolean;
 }
