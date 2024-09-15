@@ -2,7 +2,7 @@ name: Deploy dev to Self-Hosted
 
 on:
     workflow_run:
-        workflows: ['name: CI for Development']
+        workflows: ['CI for Development']
         branches: ['dev']
         types:
             - completed
