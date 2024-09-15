@@ -36,7 +36,7 @@ export class LabService {
 
   async findAll() {
     const labs = await this.labRepository.find({
-      relations: ['creator', 'creator.user'],  
+      relations: ['creator'],  
     });
 
     return labs.map(lab => ({
