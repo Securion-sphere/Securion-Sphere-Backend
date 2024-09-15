@@ -38,14 +38,15 @@ services:
     ports:
       - 5432:5432
     networks:
-      - network-backend
+      - securion-backend
 
 networks:
-  network-backend:
+  securion-backend:
     driver: bridge
-    name: network-backend
+    name: securion-backend
     external: true
 
 volumes:
   pg_postgres_data:
+    name: pg_postgres_data
     external: true
