@@ -2,10 +2,12 @@ import {
   Column,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { User } from './user.entity';
+import { Lab } from './lab.entity';
 
 @Entity()
 export class Supervisor {
@@ -17,8 +19,8 @@ export class Supervisor {
   user: User;
 
   @Column()
-  created_machine: number;
-
-  @Column()
   created_content: number;
+
+  @OneToMany(() => Lab, (lab) => lab.creator)
+  labs: Lab[];
 }

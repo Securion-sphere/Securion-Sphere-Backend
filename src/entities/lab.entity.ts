@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Supervisor } from "./supervisor.entity";
 
 @Entity()
@@ -18,7 +18,7 @@ export class Lab {
     @Column({ type: 'text'})
     category: string;
 
-    @OneToMany(() => Supervisor, (supervisor) => supervisor.user)
+    @ManyToOne(() => Supervisor, (supervisor) => supervisor.labs)
     creator: Supervisor;
 
     @Column({ type: 'boolean', default: false })
