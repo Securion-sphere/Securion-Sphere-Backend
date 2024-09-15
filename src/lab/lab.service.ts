@@ -4,23 +4,51 @@ import { UpdateLabDto } from './dto/update-lab.dto';
 import { DataSource, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Lab } from 'src/entities/lab.entity';
+import { Supervisor } from 'src/entities/supervisor.entity';
 
 @Injectable()
 export class LabService {
   constructor(
     @InjectRepository(Lab)
     private labRepository: Repository<Lab>,
+    @InjectRepository(Supervisor)
+    private readonly supervisorRepository: Repository<Supervisor>,
     private dataSource: DataSource,
   ) {}
 
-  async create(createLabDto: CreateLabDto) {
-    const lab = this.labRepository.create(createLabDto);
-    return await this.labRepository.save(lab);
+  async create(createLabDto: CreateLabDto): Promise<Lab> {
+    const { creatorId, ...labData } = createLabDto;
+
+    const supervisor = await this.supervisorRepository.findOneBy({ id: creatorId });
+
+    if (!supervisor) {
+      throw new Error('Supervisor not found');
+    }
+
+    const newLab = this.labRepository.create({
+      ...labData,
+      creator: supervisor,  
+    });
+
+    return await this.labRepository.save(newLab);
   }
 
+
   async findAll() {
-    return await this.labRepository.find();
-  }
+    const labs = await this.labRepository.find({
+      relations: ['creator'],  
+    });
+
+    return labs.map(lab => ({
+      id: lab.id,
+      name: lab.name,
+      description: lab.description,
+      point: lab.point,
+      category: lab.category,
+      isActive: lab.isActive,
+      creatorName: lab.creator?.user?.nickName || 'Unknown', 
+    }));
+}
 
   async findByName(name: string) {
     return await this.labRepository.findOne({ where: {name} })
