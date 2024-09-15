@@ -1,9 +1,9 @@
-import { Inject } from '@nestjs/common';
-import { ConfigType } from '@nestjs/config';
-import { PassportStrategy } from '@nestjs/passport';
-import { Strategy, VerifyCallback } from 'passport-google-oauth2';
-import googleOauthConfig from 'src/config/google-oauth.config';
-import { AuthService } from '../auth.service';
+import { Inject } from "@nestjs/common";
+import { ConfigType } from "@nestjs/config";
+import { PassportStrategy } from "@nestjs/passport";
+import { Strategy, VerifyCallback } from "passport-google-oauth2";
+import googleOauthConfig from "src/config/google-oauth.config";
+import { AuthService } from "../auth.service";
 
 export class GoogleStrategy extends PassportStrategy(Strategy) {
   constructor(
@@ -15,7 +15,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
       clientID: googleConfiguration.clientID,
       clientSecret: googleConfiguration.clientSecret,
       callbackURL: googleConfiguration.callbackURL,
-      scope: ['email', 'profile'],
+      scope: ["email", "profile"],
     });
   }
 

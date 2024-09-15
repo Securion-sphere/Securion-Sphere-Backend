@@ -1,17 +1,17 @@
-import { Module } from '@nestjs/common';
-import { AuthController } from './auth.controller';
-import { ConfigModule } from '@nestjs/config';
-import googleOauthConfig from 'src/config/google-oauth.config';
-import { GoogleStrategy } from './utils/google.strategy';
-import { AuthService } from './auth.service';
-import { UserService } from 'src/user/user.service';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from 'src/entities/user.entity';
-import { JwtModule } from '@nestjs/jwt';
-import jwtConfig from 'src/config/jwt.config';
-import { JwtStrategy } from './utils/jwt.strategy';
-import refreshJwtCofig from 'src/config/refresh-jwt.cofig';
-import { RefreshJwtStrategy } from './utils/refresh.strategy';
+import { Module } from "@nestjs/common";
+import { AuthController } from "./auth.controller";
+import { ConfigModule } from "@nestjs/config";
+import googleOauthConfig from "src/config/google-oauth.config";
+import { GoogleStrategy } from "./utils/google.strategy";
+import { AuthService } from "./auth.service";
+import { UserService } from "src/user/user.service";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { User } from "src/entities/user.entity";
+import { JwtModule } from "@nestjs/jwt";
+import jwtConfig from "src/config/jwt.config";
+import { JwtStrategy } from "./utils/jwt.strategy";
+import refreshJwtCofig from "src/config/refresh-jwt.config";
+import { RefreshJwtStrategy } from "./utils/refresh.strategy";
 
 @Module({
   imports: [

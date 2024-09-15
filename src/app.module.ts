@@ -1,13 +1,14 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import config from './config/config';
-import dbConfig from './config/db.config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
-import { LabModule } from './lab/lab.module';
+import { Module } from "@nestjs/common";
+import { AppController } from "./app.controller";
+import { AppService } from "./app.service";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import config from "./config/config";
+import dbConfig from "./config/db.config";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { AuthModule } from "./auth/auth.module";
+import { UserModule } from "./user/user.module";
+import { LabModule } from "./lab/lab.module";
+import { LabImageModule } from "./lab-image/lab-image.module";
 
 @Module({
   imports: [
@@ -16,19 +17,20 @@ import { LabModule } from './lab/lab.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get<string>('db.host', 'localhost'),
-        port: configService.get<number>('db.port', 5432),
-        username: configService.get<string>('db.user'),
-        password: configService.get<string>('db.pass'),
-        database: configService.get<string>('db.name'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        type: "postgres",
+        host: configService.get<string>("db.host", "localhost"),
+        port: configService.get<number>("db.port", 5432),
+        username: configService.get<string>("db.user"),
+        password: configService.get<string>("db.pass"),
+        database: configService.get<string>("db.name"),
+        entities: [__dirname + "/**/*.entity{.ts,.js}"],
         synchronize: true,
       }),
     }),
     AuthModule,
     UserModule,
     LabModule,
+    LabImageModule,
   ],
   controllers: [AppController],
   providers: [AppService],
