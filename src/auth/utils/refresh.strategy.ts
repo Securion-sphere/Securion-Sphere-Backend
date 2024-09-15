@@ -4,7 +4,7 @@ import { ExtractJwt, Strategy } from "passport-jwt";
 import { AuthJwtPayload } from "../types/auth-jwtPayload";
 import { Inject, Injectable } from "@nestjs/common";
 import { Request } from "express";
-import refreshJwtCofig from "src/config/refresh-jwt.cofig";
+import refreshJwtCofig from "src/config/refresh-jwt.config";
 import { AuthService } from "../auth.service";
 
 @Injectable()

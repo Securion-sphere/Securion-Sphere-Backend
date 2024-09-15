@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
-import { GoogleAuthGuard } from './guards/google-auth/google-auth.guard';
-import { AuthService } from './auth.service';
-import { RefreshAuthGuard } from './guards/refresh-auth/refresh-auth.guard';
-import { JwtAuthGuard } from './guards/jwt-auth/jwt-auth.guard';
-import { ConfigService } from '@nestjs/config';
+import { Controller, Get, Post, Req, Res, UseGuards } from "@nestjs/common";
+import { GoogleAuthGuard } from "./guards/google-auth/google-auth.guard";
+import { AuthService } from "./auth.service";
+import { RefreshAuthGuard } from "./guards/refresh-auth/refresh-auth.guard";
+import { JwtAuthGuard } from "./guards/jwt-auth/jwt-auth.guard";
+import { ConfigService } from "@nestjs/config";
+import { ApiBearerAuth } from "@nestjs/swagger";
 
 @Controller("auth")
 export class AuthController {
@@ -14,7 +15,7 @@ export class AuthController {
 
   @UseGuards(GoogleAuthGuard)
   @Get("google/login")
-  googleLogin() {}
+  async googleLogin() {}
 
   @UseGuards(GoogleAuthGuard)
   @Get("google/callback")
@@ -22,19 +23,21 @@ export class AuthController {
     const response = await this.authService.login(req.user.id);
 
     // Redirect to the frontend with tokens in the query params
-    const frontendUrl = this.configService.get<string>('frontendUrl');
+    const frontendUrl = this.configService.get<string>("frontendUrl");
     res.redirect(
       `${frontendUrl}/?accessToken=${response.accessToken}&refreshToken=${response.refreshToken}`,
     );
   }
 
   @UseGuards(RefreshAuthGuard)
+  @ApiBearerAuth("refresh-token")
   @Post("refresh")
   refreshToken(@Req() req) {
     return this.authService.refreshToken(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth("access-token")
   @Post("logout")
   logout(@Req() req) {
     this.authService.logout(req.user.id);

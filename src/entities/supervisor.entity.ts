@@ -1,7 +1,6 @@
 import {
   Column,
   Entity,
-  JoinColumn,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -15,7 +14,6 @@ export class Supervisor {
   id: number;
 
   @OneToOne(() => User)
-  @JoinColumn({ name: "userId" })
   user: User;
 
   @Column()

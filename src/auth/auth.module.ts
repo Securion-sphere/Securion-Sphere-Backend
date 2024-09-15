@@ -10,7 +10,7 @@ import { User } from "src/entities/user.entity";
 import { JwtModule } from "@nestjs/jwt";
 import jwtConfig from "src/config/jwt.config";
 import { JwtStrategy } from "./utils/jwt.strategy";
-import refreshJwtCofig from "src/config/refresh-jwt.cofig";
+import refreshJwtCofig from "src/config/refresh-jwt.config";
 import { RefreshJwtStrategy } from "./utils/refresh.strategy";
 
 @Module({

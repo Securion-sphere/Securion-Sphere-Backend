@@ -1,13 +1,14 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import config from './config/config';
-import dbConfig from './config/db.config';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from './auth/auth.module';
-import { UserModule } from './user/user.module';
-import { LabModule } from './lab/lab.module';
+import { Module } from "@nestjs/common";
+import { AppController } from "./app.controller";
+import { AppService } from "./app.service";
+import { ConfigModule, ConfigService } from "@nestjs/config";
+import config from "./config/config";
+import dbConfig from "./config/db.config";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { AuthModule } from "./auth/auth.module";
+import { UserModule } from "./user/user.module";
+import { LabModule } from "./lab/lab.module";
+import { LabImageModule } from "./lab-image/lab-image.module";
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { LabModule } from './lab/lab.module';
     AuthModule,
     UserModule,
     LabModule,
+    LabImageModule,
   ],
   controllers: [AppController],
   providers: [AppService],

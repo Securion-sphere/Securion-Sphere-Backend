@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { Lab } from "./lab.entity";
 
 @Entity()
 export class LabImage {
@@ -9,5 +10,8 @@ export class LabImage {
   name: string;
 
   @Column({ type: "text", unique: true })
-  "image-id": string;
+  image_id: string;
+
+  @OneToMany(() => Lab, (lab) => lab["image-id"])
+  lab_used: Lab[];
 }

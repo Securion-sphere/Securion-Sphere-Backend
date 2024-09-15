@@ -3,7 +3,7 @@ import { JwtService } from "@nestjs/jwt";
 import { CreateUserDto } from "src/user/dto/create-user.dto";
 import { UserService } from "src/user/user.service";
 import { AuthJwtPayload } from "./types/auth-jwtPayload";
-import refreshJwtCofig from "src/config/refresh-jwt.cofig";
+import refreshJwtConfig from "src/config/refresh-jwt.config";
 import { ConfigType } from "@nestjs/config";
 import * as argon2 from "argon2";
 @Injectable()
@@ -11,8 +11,8 @@ export class AuthService {
   constructor(
     private userService: UserService,
     private jwtService: JwtService,
-    @Inject(refreshJwtCofig.KEY)
-    private refreshTokenConfig: ConfigType<typeof refreshJwtCofig>,
+    @Inject(refreshJwtConfig.KEY)
+    private refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
   ) {}
 
   async login(userId: number) {

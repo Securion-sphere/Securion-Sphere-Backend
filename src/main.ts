@@ -7,13 +7,13 @@ import { NestExpressApplication } from "@nestjs/platform-express";
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get<ConfigService>(ConfigService);
-  const nodeEnv = configService.get<string>('NODE_ENV');
+  const nodeEnv = configService.get<string>("NODE_ENV");
 
   app.enableCors({
-    origin: `${configService.get<string>('frontendUrl')}`,
+    origin: `${configService.get<string>("frontendUrl")}`,
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   });
 
   if (nodeEnv !== "production") {
@@ -21,8 +21,33 @@ async function bootstrap() {
       .setTitle("SecurionSphere API")
       .setDescription("SecurionSphere API")
       .setVersion("1.0")
-      .addBearerAuth()
+      .addBearerAuth(
+        {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          in: "header",
+          name: "Access-Token",
+          description: "Enter your Bearer access token",
+        },
+        "access-token",
+      )
+      .addBearerAuth(
+        {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+          in: "header",
+          name: "Refresh-Token",
+          description: "Enter your Bearer refresh token",
+        },
+        "refresh-token",
+      )
       .addTag("SecurionSphere API")
+      .addSecurityRequirements({
+        "access-token": [],
+        "refresh-token": [],
+      })
       .build();
     const document = SwaggerModule.createDocument(app, swaggerConfig);
 
