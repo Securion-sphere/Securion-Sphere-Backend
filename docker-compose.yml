@@ -8,7 +8,7 @@ services:
     ports:
       - ${APP_PORT}:${APP_PORT}
     networks:
-      - network-backend
+      - securion-backend
     environment:
       - APP_PORT
       - DB_HOST
