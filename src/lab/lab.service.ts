@@ -40,7 +40,7 @@ export class LabService {
       labImage,
     });
 
-    return await this.labRepository.save(newLab);
+    return this.labRepository.save(newLab);
   }
 
   async findAll() {
@@ -60,7 +60,7 @@ export class LabService {
   }
 
   async findByName(name: string) {
-    return await this.labRepository.findOne({ where: { name } });
+    return this.labRepository.findOne({ where: { name } });
   }
 
   async update(name: string, updateLabDto: UpdateLabDto) {
@@ -94,7 +94,7 @@ export class LabService {
     });
 
     // Return the updated lab entity
-    return await this.labRepository.findOne({
+    return this.labRepository.findOne({
       where: { id: lab.id },
       relations: ["labImage", "creator"],
     });
@@ -105,7 +105,7 @@ export class LabService {
     if (!lab) {
       throw new NotFoundException();
     }
-    return await this.labRepository.remove(lab);
+    return this.labRepository.remove(lab);
   }
 
   async getSolved(name: string) {
