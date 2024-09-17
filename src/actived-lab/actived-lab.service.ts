@@ -9,6 +9,7 @@ import { User } from "src/entities/user.entity";
 import { Lab } from "src/entities/lab.entity";
 import { DeleteLabInstanceDto } from "./dto/deactivated-lab.dto";
 import { SubmitFlagDto } from "./dto/submit-flag.dto";
+import { CreateLabInstanceReturnDto } from "./dto/create-lab-instance-return.dto";
 
 @Injectable()
 export class ActivedLabService {
@@ -24,7 +25,7 @@ export class ActivedLabService {
 
   async active(
     createLabInstanceDto: CreateLabInstanceDto,
-  ): Promise<ActivatedLab> {
+  ): Promise<CreateLabInstanceReturnDto> {
     const port = randomInt(30000, 50001);
     const ip = this.configService.get<string>("docker.host");
     const flag = "flag{" + randomBytes(48).toString("hex") + "}";
@@ -65,7 +66,14 @@ export class ActivedLabService {
       actived_machine: newActivedLab,
     });
 
-    return newActivedLab;
+    const {
+      id: resId,
+      instanceOwner,
+      instanceLab,
+      ip: resIp,
+      port: resPort,
+    } = newActivedLab;
+    return { id: resId, instanceOwner, instanceLab, ip: resIp, port: resPort };
   }
 
   async deactivate(deleteLabInstanceDto: DeleteLabInstanceDto) {
@@ -85,6 +93,10 @@ export class ActivedLabService {
       where: { instanceOwner: owner },
     });
 
+    if (!instance) {
+      throw new Error("User haven't create instance yet");
+    }
+
     await this.activeLabRepository.delete(instance.id);
 
     return { msg: "Successfully stop instance" };
@@ -92,7 +104,6 @@ export class ActivedLabService {
 
   async submitFlag(submitFlagDto: SubmitFlagDto) {
     const { userId, flag } = submitFlagDto;
-
     const owner = await this.userRepository.findOneBy({ id: userId });
 
     const activatedLab = await this.activeLabRepository.findOne({
@@ -114,5 +125,20 @@ export class ActivedLabService {
 
       return { msg: "Flag is correct" };
     }
+  }
+
+  async getInstance(id: number) {
+    const user = await this.userRepository.findOneBy({ id });
+    const instance = await this.activeLabRepository.findOne({
+      where: { instanceOwner: user },
+    });
+
+    if (!instance) {
+      throw new Error("User haven't create instance yet");
+    }
+
+    const { id: instanceId, instanceOwner, instanceLab, ip, port } = instance;
+
+    return { id: instanceId, instanceOwner, instanceLab, ip, port };
   }
 }
