@@ -22,7 +22,7 @@ export class Lab {
   @ManyToOne(() => Supervisor, (supervisor) => supervisor.labs)
   creator: Supervisor;
 
-  @ManyToOne(() => LabImage, (labImage) => labImage["image-id"])
+  @ManyToOne(() => LabImage, (labImage) => labImage.image_id)
   labImage: LabImage;
 
   @Column({ type: "boolean", default: false })
