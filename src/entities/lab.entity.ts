@@ -1,6 +1,13 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 import { Supervisor } from "./supervisor.entity";
 import { LabImage } from "./lab-image.entity";
+import { User } from "./user.entity";
 
 @Entity()
 export class Lab {
@@ -24,6 +31,9 @@ export class Lab {
 
   @ManyToOne(() => LabImage, (labImage) => labImage.image_id)
   labImage: LabImage;
+
+  @ManyToMany(() => User)
+  solved_by: User[];
 
   @Column({ type: "boolean", default: false })
   isActive: boolean;

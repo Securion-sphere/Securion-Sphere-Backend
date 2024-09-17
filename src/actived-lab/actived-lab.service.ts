@@ -104,27 +104,60 @@ export class ActivedLabService {
 
   async submitFlag(submitFlagDto: SubmitFlagDto) {
     const { userId, flag } = submitFlagDto;
-    const owner = await this.userRepository.findOneBy({ id: userId });
+    const owner = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ["solved_machine"], // Ensure `solved_machine` is loaded
+    });
+
+    if (!owner) {
+      return { msg: "User not found" };
+    }
 
     const activatedLab = await this.activeLabRepository.findOne({
       where: { flag, instanceOwner: owner },
+      relations: ["instanceLab"],
     });
 
     if (!activatedLab) {
       return { msg: "Flag is not correct" };
-    } else {
-      await this.userRepository.update(userId, {
-        actived_machine: null,
-      });
-
-      const lab = await this.activeLabRepository.findOne({
-        where: { instanceOwner: owner },
-      });
-
-      this.activeLabRepository.remove(lab);
-
-      return { msg: "Flag is correct" };
     }
+    console.log(activatedLab);
+    // Optionally, clear the existing `actived_machine`
+    await this.userRepository.update(userId, {
+      actived_machine: null,
+    });
+
+    // Find the lab to be removed
+    const lab = await this.activeLabRepository.findOne({
+      where: { instanceOwner: owner },
+    });
+
+    // Ensure the `solved_machine` array is initialized
+    if (!owner.solved_machine) {
+      owner.solved_machine = [];
+    }
+
+    console.log("Activated Lab Instance Lab:", activatedLab.instanceLab);
+
+    // Check if instanceLab is correctly set
+    if (!activatedLab.instanceLab) {
+      return { msg: "Activated lab does not have an instanceLab" };
+    }
+
+    // Push the new `solved_machine` item
+    owner.solved_machine.push(activatedLab.instanceLab);
+
+    console.log("Updated Solved Machine Array:", owner.solved_machine);
+
+    // Save the updated `owner` entity
+    await this.userRepository.save(owner);
+
+    // Remove the `lab` from `activeLabRepository`
+    if (lab) {
+      await this.activeLabRepository.remove(lab);
+    }
+
+    return { msg: "Flag is correct" };
   }
 
   async getInstance(id: number) {

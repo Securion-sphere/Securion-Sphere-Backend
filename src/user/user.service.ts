@@ -36,6 +36,7 @@ export class UserService {
         "profile_img",
         "hashedRefreshToken",
       ],
+      relations: ["solved_machine"],
     });
   }
 
