@@ -29,7 +29,13 @@ export class UserService {
   findOne(id: number) {
     return this.UserRepo.findOne({
       where: { id },
-      select: ["firstName", "lastName", "profile_img", "hashedRefreshToken"],
+      select: [
+        "id",
+        "firstName",
+        "lastName",
+        "profile_img",
+        "hashedRefreshToken",
+      ],
     });
   }
 

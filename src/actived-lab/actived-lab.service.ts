@@ -27,7 +27,7 @@ export class ActivedLabService {
   ): Promise<ActivatedLab> {
     const port = randomInt(30000, 50001);
     const ip = this.configService.get<string>("docker.host");
-    const flag = randomBytes(48).toString("hex");
+    const flag = "flag{" + randomBytes(48).toString("hex") + "}";
     const owner = await this.userRepository.findOneBy({
       id: createLabInstanceDto.userId,
     });
@@ -42,6 +42,14 @@ export class ActivedLabService {
 
     if (!lab) {
       throw new Error("Lab not found");
+    }
+
+    const existingInstance = await this.activeLabRepository.find({
+      where: { instanceOwner: owner },
+    });
+
+    if (existingInstance.length > 0) {
+      throw new Error("User already have existing instance.");
     }
 
     const newActivedLab = this.activeLabRepository.create({
@@ -69,15 +77,17 @@ export class ActivedLabService {
       throw new Error("User not found");
     }
 
-    this.userRepository.update(deleteLabInstanceDto.userId, {
+    await this.userRepository.update(deleteLabInstanceDto.userId, {
       actived_machine: null,
     });
 
-    const lab = await this.activeLabRepository.findOne({
+    const instance = await this.activeLabRepository.findOne({
       where: { instanceOwner: owner },
     });
 
-    return this.activeLabRepository.remove(lab);
+    await this.activeLabRepository.delete(instance.id);
+
+    return { msg: "Successfully stop instance" };
   }
 
   async submitFlag(submitFlagDto: SubmitFlagDto) {
