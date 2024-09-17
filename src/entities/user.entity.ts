@@ -1,6 +1,13 @@
-import { Column, Entity, OneToOne, PrimaryGeneratedColumn } from "typeorm";
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from "typeorm";
 import { Student } from "./student.entity";
 import { Supervisor } from "./supervisor.entity";
+import { ActivatedLab } from "./actived-lab.entity";
 
 @Entity()
 export class User {
@@ -19,14 +26,12 @@ export class User {
   @Column()
   profile_img: string;
 
-  // @Column()
-  // googleId: string;
-
   @Column()
   email: string;
 
-  @Column({ default: 0 })
-  actived_machine: number;
+  @OneToOne(() => ActivatedLab, (activatedLab) => activatedLab.instanceOwner)
+  @JoinColumn()
+  actived_machine: ActivatedLab;
 
   @Column({ nullable: true })
   hashedRefreshToken: string;

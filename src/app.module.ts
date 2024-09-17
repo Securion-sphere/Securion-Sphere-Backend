@@ -9,10 +9,24 @@ import { AuthModule } from "./auth/auth.module";
 import { UserModule } from "./user/user.module";
 import { LabModule } from "./lab/lab.module";
 import { LabImageModule } from "./lab-image/lab-image.module";
+import { ActivedLabModule } from "./actived-lab/actived-lab.module";
+import dockerConfig from "./config/docker.config";
+import googleOauthConfig from "./config/google-oauth.config";
+import jwtConfig from "./config/jwt.config";
+import refreshJwtConfig from "./config/refresh-jwt.config";
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ load: [config, dbConfig] }),
+    ConfigModule.forRoot({
+      load: [
+        config,
+        dbConfig,
+        dockerConfig,
+        googleOauthConfig,
+        jwtConfig,
+        refreshJwtConfig,
+      ],
+    }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -31,6 +45,7 @@ import { LabImageModule } from "./lab-image/lab-image.module";
     UserModule,
     LabModule,
     LabImageModule,
+    ActivedLabModule,
   ],
   controllers: [AppController],
   providers: [AppService],
