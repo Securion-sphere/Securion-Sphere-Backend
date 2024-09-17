@@ -14,20 +14,25 @@ export class ActivedLabController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
   async active(@Body() createLabInstanceDto: CreateLabInstanceDto) {
-    return await this.activedLabService.active(createLabInstanceDto);
+    try {
+      const res = await this.activedLabService.active(createLabInstanceDto);
+      return res;
+    } catch (err) {
+      return { err: err.message };
+    }
   }
 
   @Delete()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
   async deactivate(@Body() deleteLabInstanceDto: DeleteLabInstanceDto) {
-    return await this.activedLabService.deactivate(deleteLabInstanceDto);
+    return this.activedLabService.deactivate(deleteLabInstanceDto);
   }
 
   @Post("submit-flag")
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
   async submitFlag(@Body() submitFlagDto: SubmitFlagDto) {
-    return await this.activedLabService.submitFlag(submitFlagDto);
+    return this.activedLabService.submitFlag(submitFlagDto);
   }
 }
