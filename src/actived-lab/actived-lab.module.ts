@@ -8,10 +8,20 @@ import { ActivatedLab } from "src/entities/actived-lab.entity";
 import { ConfigModule } from "@nestjs/config";
 import dockerConfig from "src/config/docker.config";
 import { UserService } from "src/user/user.service";
+import { Student } from "src/entities/student.entity";
+import { Supervisor } from "src/entities/supervisor.entity";
+import { Solvation } from "src/entities/solvation.entity";
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([ActivatedLab, Lab, User]),
+    TypeOrmModule.forFeature([
+      ActivatedLab,
+      Lab,
+      User,
+      Student,
+      Supervisor,
+      Solvation,
+    ]),
     ConfigModule.forFeature(dockerConfig),
   ],
   controllers: [ActivedLabController],

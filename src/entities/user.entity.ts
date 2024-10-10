@@ -2,15 +2,12 @@ import {
   Column,
   Entity,
   JoinColumn,
-  JoinTable,
-  ManyToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { Student } from "./student.entity";
 import { Supervisor } from "./supervisor.entity";
 import { ActivatedLab } from "./actived-lab.entity";
-import { Lab } from "./lab.entity";
 
 @Entity()
 export class User {
@@ -26,19 +23,15 @@ export class User {
   @Column({ nullable: true })
   nickName: string;
 
-  @Column()
+  @Column({ nullable: true })
   profile_img: string;
 
   @Column()
   email: string;
 
   @OneToOne(() => ActivatedLab, (activatedLab) => activatedLab.instanceOwner)
-  @JoinColumn()
-  actived_machine: ActivatedLab;
-
-  @ManyToMany(() => Lab)
-  @JoinTable()
-  solved_machine: Lab[];
+  @JoinColumn({ name: "active_lab_id" })
+  activate_lab: ActivatedLab;
 
   @Column({ nullable: true })
   hashedRefreshToken: string;

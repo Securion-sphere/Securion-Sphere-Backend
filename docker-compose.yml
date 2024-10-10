@@ -3,12 +3,20 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+        restart: true
     container_name: securion-sphere-backend
     restart: unless-stopped
     ports:
       - ${APP_PORT}:${APP_PORT}
     networks:
       - securion-backend
+    env_file:
+      - .env.local
+      - .env.development.local
+      - .env
     environment:
       - APP_PORT
       - DB_HOST
@@ -29,6 +37,12 @@ services:
     image: postgres
     container_name: securion-pg
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+      timeout: 10s
     volumes:
       - pg_postgres_data:/var/lib/postgresql/data
     environment:

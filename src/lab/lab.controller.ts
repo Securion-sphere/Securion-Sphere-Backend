@@ -12,9 +12,10 @@ import { LabService } from "./lab.service";
 import { CreateLabDto } from "./dto/create-lab.dto";
 import { UpdateLabDto } from "./dto/update-lab.dto";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth/jwt-auth.guard";
-import { ApiBearerAuth } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 @Controller("lab")
+@ApiTags("lab")
 export class LabController {
   constructor(private readonly labService: LabService) {}
 

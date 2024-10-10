@@ -3,6 +3,7 @@ import { AppModule } from "./app.module";
 import { ConfigService } from "@nestjs/config";
 import { DocumentBuilder, SwaggerModule } from "@nestjs/swagger";
 import { NestExpressApplication } from "@nestjs/platform-express";
+import { ValidationPipe } from "@nestjs/common";
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
@@ -15,6 +16,8 @@ async function bootstrap() {
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
   });
+
+  app.useGlobalPipes(new ValidationPipe());
 
   if (nodeEnv !== "production") {
     const swaggerConfig = new DocumentBuilder()

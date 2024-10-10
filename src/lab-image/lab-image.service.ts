@@ -14,15 +14,15 @@ export class LabImageService {
 
   async create(createLabImageDto: CreateLabImageDto): Promise<LabImage> {
     const newLabImage = this.labImageRepository.create(createLabImageDto);
-    return await this.labImageRepository.save(newLabImage);
+    return this.labImageRepository.save(newLabImage);
   }
 
   async findAll() {
-    return await this.labImageRepository.find();
+    return this.labImageRepository.find();
   }
 
   async findByName(name: string) {
-    return await this.labImageRepository.findOne({ where: { name } });
+    return this.labImageRepository.findOne({ where: { name } });
   }
 
   async update(name: string, updateLabImageDto: UpdateLabImageDto) {
@@ -31,7 +31,7 @@ export class LabImageService {
       throw new NotFoundException();
     } else {
       await this.labImageRepository.update(lab.id, updateLabImageDto);
-      return await this.labImageRepository.findOne({ where: { id: lab.id } });
+      return this.labImageRepository.findOne({ where: { id: lab.id } });
     }
   }
 
@@ -40,6 +40,6 @@ export class LabImageService {
     if (!lab) {
       throw new NotFoundException();
     }
-    return await this.labImageRepository.remove(lab);
+    return this.labImageRepository.remove(lab);
   }
 }

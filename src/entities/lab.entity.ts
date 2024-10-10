@@ -1,13 +1,13 @@
 import {
   Column,
   Entity,
-  ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from "typeorm";
 import { Supervisor } from "./supervisor.entity";
 import { LabImage } from "./lab-image.entity";
-import { User } from "./user.entity";
+import { Solvation } from "./solvation.entity";
 
 @Entity()
 export class Lab {
@@ -32,8 +32,8 @@ export class Lab {
   @ManyToOne(() => LabImage, (labImage) => labImage.image_id)
   labImage: LabImage;
 
-  @ManyToMany(() => User)
-  solved_by: User[];
+  @OneToMany(() => Solvation, (solvation) => solvation.lab)
+  solved_by: Solvation[];
 
   @Column({ type: "boolean", default: false })
   isActive: boolean;

@@ -12,13 +12,15 @@ import jwtConfig from "src/config/jwt.config";
 import { JwtStrategy } from "./utils/jwt.strategy";
 import refreshJwtCofig from "src/config/refresh-jwt.config";
 import { RefreshJwtStrategy } from "./utils/refresh.strategy";
+import { Student } from "src/entities/student.entity";
+import { Supervisor } from "src/entities/supervisor.entity";
 
 @Module({
   imports: [
     ConfigModule.forFeature(googleOauthConfig),
     ConfigModule.forFeature(jwtConfig),
     ConfigModule.forFeature(refreshJwtCofig),
-    TypeOrmModule.forFeature([User]),
+    TypeOrmModule.forFeature([User, Student, Supervisor]),
     JwtModule.registerAsync(jwtConfig.asProvider()),
   ],
   controllers: [AuthController],
