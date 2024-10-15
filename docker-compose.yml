@@ -17,7 +17,6 @@ services:
     env_file:
       - .env.local
       - .env.development.local
-      - .env
     environment:
       - APP_PORT
       - DB_HOST
@@ -47,12 +46,6 @@ services:
     image: postgres
     container_name: securion-pg
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
-      interval: 10s
-      retries: 5
-      start_period: 30s
-      timeout: 10s
     volumes:
       - pg_postgres_data:/var/lib/postgresql/data
     environment:
@@ -71,6 +64,9 @@ networks:
   securion-backend:
     driver: bridge
     name: securion-backend
+  securion-frontend:
+    driver: bridge
+    name: securion-frontend
 
   securion-frontend:
     driver: bridge
