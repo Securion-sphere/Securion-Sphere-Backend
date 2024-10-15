@@ -13,16 +13,18 @@ services:
       - ${APP_PORT}:${APP_PORT}
     networks:
       - securion-backend
+      - securion-frontend
     env_file:
       - .env.local
       - .env.development.local
-      - .env
     environment:
       - APP_PORT
       - DB_HOST
       - DB_USER
       - DB_PASSWORD
       - DB_NAME
+      - DOCKER_API_HOST
+      - DOCKER_API_URL
       - CLIENT_ID
       - CLIENT_SECRET
       - CALLBACK_URL
@@ -51,6 +53,9 @@ services:
       - POSTGRES_DB=${DB_NAME}
     ports:
       - 5432:5432
+    env_file:
+      - .env.local
+      - .env.development.local
     networks:
       - securion-backend
 
@@ -58,6 +63,10 @@ networks:
   securion-backend:
     driver: bridge
     name: securion-backend
+    external: true
+  securion-frontend:
+    driver: bridge
+    name: securion-frontend
     external: true
 
 volumes:
