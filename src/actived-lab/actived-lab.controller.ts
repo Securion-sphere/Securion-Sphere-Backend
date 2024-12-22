@@ -9,13 +9,14 @@ import {
 } from "@nestjs/common";
 import { ActivedLabService } from "./actived-lab.service";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth/jwt-auth.guard";
-import { ApiBearerAuth } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { CreateLabInstanceDto } from "./dto/active-lab.dto";
 import { DeleteLabInstanceDto } from "./dto/deactivated-lab.dto";
 import { SubmitFlagDto } from "./dto/submit-flag.dto";
 import { GetLabInstanceResponseDto } from "./dto/get-instance.dto";
 
 @Controller("actived-lab")
+@ApiTags("active-lab")
 export class ActivedLabController {
   constructor(private readonly activedLabService: ActivedLabService) {}
 
@@ -23,7 +24,7 @@ export class ActivedLabController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
   async active(@Body() createLabInstanceDto: CreateLabInstanceDto) {
-    return await this.activedLabService.active(createLabInstanceDto);
+    return this.activedLabService.active(createLabInstanceDto);
   }
 
   @Delete()

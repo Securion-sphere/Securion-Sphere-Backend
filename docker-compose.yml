@@ -3,12 +3,20 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+        restart: true
     container_name: securion-sphere-backend
     restart: unless-stopped
     ports:
       - ${APP_PORT}:${APP_PORT}
     networks:
       - securion-backend
+      - securion-frontend
+    env_file:
+      - .env.local
+      - .env.development.local
     environment:
       - APP_PORT
       - DB_HOST
@@ -16,6 +24,8 @@ services:
       - DB_PASSWORD
       - DB_NAME
       - DB_PORT
+      - DOCKER_API_HOST
+      - DOCKER_API_URL
       - CLIENT_ID
       - CLIENT_SECRET
       - CALLBACK_URL
@@ -25,8 +35,6 @@ services:
       - REFRESH_JWT_EXPIRE_IN
       - FRONTEND_URL
       - TZ
-    depends_on:
-      - postgres
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${APP_PORT}/"]
       interval: 30s
@@ -46,6 +54,9 @@ services:
       - POSTGRES_DB=${DB_NAME}
     ports:
       - 5432:5432
+    env_file:
+      - .env.local
+      - .env.development.local
     networks:
       - securion-backend
     healthcheck:
@@ -59,8 +70,10 @@ networks:
   securion-backend:
     driver: bridge
     name: securion-backend
+  securion-frontend:
+    driver: bridge
+    name: securion-frontend
 
 volumes:
   pg_postgres_data:
     name: pg_postgres_data
-    external: true

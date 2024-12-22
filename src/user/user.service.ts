@@ -4,18 +4,52 @@ import { UpdateUserDto } from "./dto/update-user.dto";
 import { Repository } from "typeorm";
 import { User } from "src/entities/user.entity";
 import { Injectable } from "@nestjs/common";
+import { Student } from "src/entities/student.entity";
+import { Supervisor } from "src/entities/supervisor.entity";
+import { Role } from "./types/role";
 
 @Injectable()
 export class UserService {
-  constructor(@InjectRepository(User) private UserRepo: Repository<User>) {}
+  constructor(
+    @InjectRepository(User)
+    private readonly userRepo: Repository<User>,
+    @InjectRepository(Student)
+    private readonly studentRepo: Repository<Student>,
+    @InjectRepository(Supervisor)
+    private readonly supervisorRepo: Repository<Supervisor>,
+  ) {}
 
   async create(createUserDto: CreateUserDto) {
-    const user = await this.UserRepo.create(createUserDto);
-    return await this.UserRepo.save(user);
+    const user = this.userRepo.create(createUserDto);
+    const resUser = await this.userRepo.save(user);
+
+    const studenRegex = /^\d{8}@kmitl\.ac\.th$/;
+    const supervisorRegex = /^[a-zA-Z]+(\.[a-zA-Z]+)?@kmitl\.ac\.th$/;
+
+    let role: Role = null;
+
+    if (studenRegex.test(resUser.email)) {
+      const { user } = await this.studentRepo.save(
+        this.studentRepo.create({
+          user: resUser,
+          year: 0,
+          solved_lab: [],
+        }),
+      );
+      role = { role: "Student", user };
+    } else if (supervisorRegex.test(resUser.email)) {
+      const { user } = await this.supervisorRepo.save(
+        this.supervisorRepo.create({
+          user: resUser,
+        }),
+      );
+      role = { role: "Supervisor", user };
+    }
+    return role;
   }
 
   async findByEmail(email: string) {
-    return await this.UserRepo.findOne({
+    return this.userRepo.findOne({
       where: {
         email,
       },
@@ -26,18 +60,13 @@ export class UserService {
     return `This action returns all user`;
   }
 
-  findOne(id: number) {
-    return this.UserRepo.findOne({
+  async findOne(id: number) {
+    const user = await this.userRepo.findOne({
       where: { id },
-      select: [
-        "id",
-        "firstName",
-        "lastName",
-        "profile_img",
-        "hashedRefreshToken",
-      ],
-      relations: ["solved_machine"],
+      relations: ["student", "supervisor", "student.solved_lab"],
     });
+
+    return user;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -50,6 +79,6 @@ export class UserService {
   }
 
   async updateHashedRefreshToken(userId: number, hashedRefreshToken: string) {
-    return await this.UserRepo.update({ id: userId }, { hashedRefreshToken });
+    return this.userRepo.update({ id: userId }, { hashedRefreshToken });
   }
 }

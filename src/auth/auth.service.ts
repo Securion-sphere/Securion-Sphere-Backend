@@ -6,6 +6,7 @@ import { AuthJwtPayload } from "./types/auth-jwtPayload";
 import refreshJwtConfig from "src/config/refresh-jwt.config";
 import { ConfigType } from "@nestjs/config";
 import * as argon2 from "argon2";
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -16,6 +17,10 @@ export class AuthService {
   ) {}
 
   async login(userId: number) {
+    const user = await this.userService.findOne(userId);
+    if (!user) {
+      return { msg: "User not found" };
+    }
     const { accessToken, refreshToken } = await this.generateTokens(userId);
     const hashedRefreshToken = await argon2.hash(refreshToken);
     await this.userService.updateHashedRefreshToken(userId, hashedRefreshToken);
@@ -59,7 +64,7 @@ export class AuthService {
   async validateGoogleUser(googleUser: CreateUserDto) {
     const user = await this.userService.findByEmail(googleUser.email);
     if (user) return user;
-    return await this.userService.create(googleUser);
+    return this.userService.create(googleUser);
   }
 
   async refreshToken(userId: number) {

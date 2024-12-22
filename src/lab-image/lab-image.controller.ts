@@ -12,9 +12,10 @@ import { LabImageService } from "./lab-image.service";
 import { CreateLabImageDto } from "./dto/create-lab-image.dto";
 import { UpdateLabImageDto } from "./dto/update-lab-image.dto";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth/jwt-auth.guard";
-import { ApiBearerAuth } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 @Controller("lab-image")
+@ApiTags("lab-image")
 export class LabImageController {
   constructor(private readonly labImageService: LabImageService) {}
 
