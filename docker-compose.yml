@@ -15,6 +15,7 @@ services:
       - DB_USER
       - DB_PASSWORD
       - DB_NAME
+      - DB_PORT
       - CLIENT_ID
       - CLIENT_SECRET
       - CALLBACK_URL
@@ -24,6 +25,14 @@ services:
       - REFRESH_JWT_EXPIRE_IN
       - FRONTEND_URL
       - TZ
+    depends_on:
+      - postgres
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:${APP_PORT}/"]
+      interval: 30s
+      retries: 3
+      start_period: 30s
+      timeout: 30s
 
   postgres:
     image: postgres
@@ -39,12 +48,17 @@ services:
       - 5432:5432
     networks:
       - securion-backend
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${DB_USER}"]
+      interval: 30s
+      retries: 3
+      start_period: 30s
+      timeout: 30s
 
 networks:
   securion-backend:
     driver: bridge
     name: securion-backend
-    external: true
 
 volumes:
   pg_postgres_data:
