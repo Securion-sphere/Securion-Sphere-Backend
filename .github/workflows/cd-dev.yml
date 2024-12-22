@@ -17,6 +17,7 @@ env:
     TZ: ${{ secrets.TZ }}
 
 on:
+    workflow_dispatch:
     workflow_run:
         workflows: ['CI for Development']
         branches: ['dev']
@@ -25,7 +26,7 @@ on:
 
 jobs:
     deploy:
-        if: ${{ github.event.workflow_run.conclusion == 'success' }}  # Only run if previous workflow succeeded
+        if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
         name: Deploy to dev
         runs-on: self-hosted
         steps:
