@@ -68,10 +68,6 @@ networks:
     driver: bridge
     name: securion-frontend
 
-  securion-frontend:
-    driver: bridge
-    name: securion-frontend
-
 volumes:
   pg_postgres_data:
     name: pg_postgres_data
