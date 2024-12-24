@@ -1,22 +1,23 @@
 services:
-  securion-sphere-backend:
+  securion-backend:
     build:
       context: .
       dockerfile: Dockerfile
+    image: securion-backend
+    container_name: securion-backend
     depends_on:
-      postgres:
+      securion-pg:
         condition: service_healthy
         restart: true
-    container_name: securion-sphere-backend
+      securion-minio:
+        condition: service_healthy
+        restart: true
     restart: unless-stopped
     ports:
       - ${APP_PORT}:${APP_PORT}
     networks:
       - securion-backend
       - securion-frontend
-    env_file:
-      - .env.local
-      - .env.development.local
     environment:
       - APP_PORT
       - DB_HOST
@@ -42,21 +43,18 @@ services:
       start_period: 30s
       timeout: 30s
 
-  postgres:
+  securion-pg:
     image: postgres
     container_name: securion-pg
     restart: unless-stopped
     volumes:
-      - pg_postgres_data:/var/lib/postgresql/data
+      - securion-pg-data:/var/lib/postgresql/data
     environment:
       - POSTGRES_USER=${DB_USER}
       - POSTGRES_PASSWORD=${DB_PASSWORD}
       - POSTGRES_DB=${DB_NAME}
     ports:
       - 5432:5432
-    env_file:
-      - .env.local
-      - .env.development.local
     networks:
       - securion-backend
     healthcheck:
@@ -65,6 +63,28 @@ services:
       retries: 3
       start_period: 30s
       timeout: 30s
+
+  securion-minio:
+    image: quay.io/minio/minio
+    container_name: securion-minio
+    restart: unless-stopped
+    ports:
+      - 9000:9000
+      - 9090:9090
+    volumes:
+      - securion-minio-data:/data
+    networks:
+      - securion-backend
+      - securion-frontend
+    environment:
+      - MINIO_ROOT_USER
+      - MINIO_ROOT_PASSWORD
+    command: server /data --console-address ":9090"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
 
 networks:
   securion-backend:
@@ -75,5 +95,7 @@ networks:
     name: securion-frontend
 
 volumes:
-  pg_postgres_data:
-    name: pg_postgres_data
+  securion-pg-data:
+    name: securion-pg-data
+  securion-minio-data:
+    name: securion-minio-data
