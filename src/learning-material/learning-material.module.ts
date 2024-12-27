@@ -1,4 +1,3 @@
-// learning-material.module.ts
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigType } from '@nestjs/config';
 import { S3Client } from '@aws-sdk/client-s3';

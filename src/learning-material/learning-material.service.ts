@@ -1,8 +1,8 @@
-// learning-material.service.ts
 import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
-import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
+import { GetObjectCommand, GetObjectCommandOutput, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
 import { ConfigType } from '@nestjs/config';
 import minioConfig from 'src/config/minio.config';
+import { Readable } from 'stream';
 
 @Injectable()
 export class LearningMaterialService {
@@ -12,8 +12,7 @@ export class LearningMaterialService {
     private readonly client: S3Client,
   ) {}
 
-  async uploadFile(file) {
-    const { originalname } = file;
+  async uploadFile(file: Express.Multer.File) {
     if (!(file.mimetype.includes("pdf") || file.mimetype.includes("md"))) {
       throw new HttpException(
         "File type not supported",
@@ -24,7 +23,7 @@ export class LearningMaterialService {
       const result = await this.client.send(
         new PutObjectCommand({
           Bucket: this.MinioConfig.bucket,
-          Key: originalname,
+          Key: file.originalname,
           Body: file.buffer,
           ContentType: file.mimetype,
         }),
@@ -35,7 +34,18 @@ export class LearningMaterialService {
     }
   }
 
-  async getFileUrl(key: string) {
-    return { url: `https://${this.MinioConfig.bucket}.s3.amazonaws.com/${key}` };
+  async getFile(filename: string) {
+    try {
+      const response: GetObjectCommandOutput = await this.client.send(
+        new GetObjectCommand({
+          Bucket: this.MinioConfig.bucket,
+          Key: filename,
+        }),
+      );
+      return response.Body as Readable ?? null;
+    } catch (err) {
+      console.error(`Error getting file "${filename}":`, err);
+      throw err;
+    }
   }
 }

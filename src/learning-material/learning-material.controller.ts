@@ -1,9 +1,8 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UploadedFile, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Param, Res, UploadedFile, UseInterceptors, StreamableFile, NotFoundException, Body } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { LearningMaterialService } from './learning-material.service';
-import { CreateLearningMaterialDto } from './dto/create-learning-material.dto';
-import { UpdateLearningMaterialDto } from './dto/update-learning-material.dto';
-import { ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import { DownloadFileDto } from './dto/file-learning-material.dto';
 
 @Controller('learning-material')
 @ApiTags("learning-material")
@@ -15,12 +14,33 @@ export class LearningMaterialController {
   @Post('upload')
   @ApiConsumes('multipart/Form-data')
   @UseInterceptors(FileInterceptor('file'))
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
   uploadFile(@UploadedFile() file: Express.Multer.File) {
     return this.learningMaterialService.uploadFile(file);
   }
 
-  @Get(':key')
-  async getFileUrl(@Param('key') key: string) {
-     return this.learningMaterialService.getFileUrl(key);
-   }
+  @Get()
+  async downloadFile(@Body() { filename } : DownloadFileDto): Promise<StreamableFile> {
+    const fileStream = await this.learningMaterialService.getFile(filename);
+
+    if (!fileStream) {
+      throw new NotFoundException('File not found');
+    }
+
+    return new StreamableFile(fileStream, {
+      type: 'application/octet-stream',
+      disposition: `attachment; filename="${filename}"`,
+    });
+  }
 }
+
