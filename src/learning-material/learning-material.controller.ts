@@ -1,4 +1,4 @@
-import { Controller, Get, Post, UploadedFile, UseInterceptors, StreamableFile, NotFoundException, Body } from '@nestjs/common';
+import { Controller, Get, Post, UploadedFile, UseInterceptors, StreamableFile, NotFoundException, Param } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { LearningMaterialService } from './learning-material.service';
 import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
