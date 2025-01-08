@@ -2,7 +2,6 @@ import { Controller, Get, Post, UploadedFile, UseInterceptors, StreamableFile, N
 import { FileInterceptor } from '@nestjs/platform-express';
 import { LearningMaterialService } from './learning-material.service';
 import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
-import { DownloadFileDto } from './dto/file-learning-material.dto';
 
 @Controller('learning-material')
 @ApiTags("learning-material")
@@ -29,8 +28,8 @@ export class LearningMaterialController {
     return this.learningMaterialService.uploadFile(file);
   }
 
-  @Get()
-  async downloadFile(@Body() { filename } : DownloadFileDto): Promise<StreamableFile> {
+  @Get(':filename')
+  async downloadFile(@Param('filename') filename: string): Promise<StreamableFile> {
     const fileStream = await this.learningMaterialService.getFile(filename);
 
     if (!fileStream) {

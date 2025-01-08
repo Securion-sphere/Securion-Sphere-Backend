@@ -13,12 +13,12 @@ export class LearningMaterialService {
   ) {}
 
   async uploadFile(file: Express.Multer.File) {
-    if (!(file.mimetype.includes("pdf") || file.mimetype.includes("md"))) {
-      throw new HttpException(
-        "File type not supported",
-        HttpStatus.BAD_REQUEST,
-      );
-    }
+    // if (!(file.mimetype.includes("pdf") || file.mimetype.includes("md"))) {
+    //   throw new HttpException(
+    //     "File type not supported",
+    //     HttpStatus.BAD_REQUEST,
+    //   );
+    // } 
     try {
       const result = await this.client.send(
         new PutObjectCommand({
