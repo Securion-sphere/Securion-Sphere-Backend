@@ -14,8 +14,8 @@ import dockerConfig from "./config/docker.config";
 import googleOauthConfig from "./config/google-oauth.config";
 import jwtConfig from "./config/jwt.config";
 import refreshJwtConfig from "./config/refresh-jwt.config";
-import typeorm from "./config/typeorm";
 import minioConfig from "./config/minio.config";
+import typeorm from "./config/typeorm.config";
 
 @Module({
   imports: [
