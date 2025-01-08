@@ -9,10 +9,12 @@ import { UserModule } from "./user/user.module";
 import { LabModule } from "./lab/lab.module";
 import { LabImageModule } from "./lab-image/lab-image.module";
 import { ActivedLabModule } from "./actived-lab/actived-lab.module";
+import { LearningMaterialModule } from "./learning-material/learning-material.module";
 import dockerConfig from "./config/docker.config";
 import googleOauthConfig from "./config/google-oauth.config";
 import jwtConfig from "./config/jwt.config";
 import refreshJwtConfig from "./config/refresh-jwt.config";
+import minioConfig from "./config/minio.config";
 import typeorm from "./config/typeorm.config";
 
 @Module({
@@ -25,6 +27,7 @@ import typeorm from "./config/typeorm.config";
         googleOauthConfig,
         jwtConfig,
         refreshJwtConfig,
+        minioConfig,
       ],
       envFilePath: [".env.local", ".env"],
     }),
@@ -41,6 +44,7 @@ import typeorm from "./config/typeorm.config";
     LabModule,
     LabImageModule,
     ActivedLabModule,
+    LearningMaterialModule,
   ],
   controllers: [AppController],
   providers: [AppService],
