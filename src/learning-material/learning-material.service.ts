@@ -1,8 +1,13 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { GetObjectCommand, GetObjectCommandOutput, PutObjectCommand, S3Client } from '@aws-sdk/client-s3';
-import { ConfigType } from '@nestjs/config';
-import minioConfig from 'src/config/minio.config';
-import { Readable } from 'stream';
+import { Inject, Injectable } from "@nestjs/common";
+import {
+  GetObjectCommand,
+  GetObjectCommandOutput,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
+import { ConfigType } from "@nestjs/config";
+import minioConfig from "src/config/minio.config";
+import { Readable } from "stream";
 
 @Injectable()
 export class LearningMaterialService {
@@ -18,7 +23,7 @@ export class LearningMaterialService {
     //     "File type not supported",
     //     HttpStatus.BAD_REQUEST,
     //   );
-    // } 
+    // }
     try {
       const result = await this.client.send(
         new PutObjectCommand({
@@ -42,7 +47,7 @@ export class LearningMaterialService {
           Key: filename,
         }),
       );
-      return response.Body as Readable ?? null;
+      return (response.Body as Readable) ?? null;
     } catch (err) {
       console.error(`Error getting file "${filename}":`, err);
       throw err;

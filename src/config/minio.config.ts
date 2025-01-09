@@ -5,5 +5,5 @@ export default registerAs("minio", () => ({
   secretKey: process.env.MINIO_SECRET_KEY,
   endpoint: process.env.MINIO_ENDPOINT,
   region: process.env.MINIO_REGION,
-  bucket: process.env.MINIO_BUCKET
+  bucket: process.env.MINIO_BUCKET,
 }));

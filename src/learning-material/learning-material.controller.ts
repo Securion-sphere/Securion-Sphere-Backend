@@ -1,25 +1,34 @@
-import { Controller, Get, Post, UploadedFile, UseInterceptors, StreamableFile, NotFoundException, Param } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { LearningMaterialService } from './learning-material.service';
-import { ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import {
+  Controller,
+  Get,
+  Post,
+  UploadedFile,
+  UseInterceptors,
+  StreamableFile,
+  NotFoundException,
+  Param,
+} from "@nestjs/common";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { LearningMaterialService } from "./learning-material.service";
+import { ApiBody, ApiConsumes, ApiTags } from "@nestjs/swagger";
 
-@Controller('learning-material')
+@Controller("learning-material")
 @ApiTags("learning-material")
 export class LearningMaterialController {
   constructor(
     private readonly learningMaterialService: LearningMaterialService,
   ) {}
 
-  @Post('upload')
-  @ApiConsumes('multipart/Form-data')
-  @UseInterceptors(FileInterceptor('file'))
+  @Post("upload")
+  @ApiConsumes("multipart/Form-data")
+  @UseInterceptors(FileInterceptor("file"))
   @ApiBody({
     schema: {
-      type: 'object',
+      type: "object",
       properties: {
         file: {
-          type: 'string',
-          format: 'binary',
+          type: "string",
+          format: "binary",
         },
       },
     },
@@ -28,18 +37,19 @@ export class LearningMaterialController {
     return this.learningMaterialService.uploadFile(file);
   }
 
-  @Get(':filename')
-  async downloadFile(@Param('filename') filename: string): Promise<StreamableFile> {
+  @Get(":filename")
+  async downloadFile(
+    @Param("filename") filename: string,
+  ): Promise<StreamableFile> {
     const fileStream = await this.learningMaterialService.getFile(filename);
 
     if (!fileStream) {
-      throw new NotFoundException('File not found');
+      throw new NotFoundException("File not found");
     }
 
     return new StreamableFile(fileStream, {
-      type: 'application/octet-stream',
+      type: "application/octet-stream",
       disposition: `attachment; filename="${filename}"`,
     });
   }
 }
-
