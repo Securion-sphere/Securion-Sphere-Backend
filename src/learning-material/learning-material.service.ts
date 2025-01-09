@@ -238,7 +238,6 @@ export class LearningMaterialService {
           Key: key,
         }),
       );
-
       return (response.Body as Readable) ?? null;
     } catch (err) {
       console.error(`Error getting file for material ${id}:`, err);
