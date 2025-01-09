@@ -1,13 +1,16 @@
-import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigType } from '@nestjs/config';
-import { S3Client } from '@aws-sdk/client-s3';
-import { LearningMaterialService } from './learning-material.service';
-import { LearningMaterialController } from './learning-material.controller';
-import minioConfig from 'src/config/minio.config';
+import { Module } from "@nestjs/common";
+import { ConfigModule, ConfigType } from "@nestjs/config";
+import { TypeOrmModule } from "@nestjs/typeorm";
+import { S3Client } from "@aws-sdk/client-s3";
+import { LearningMaterialService } from "./learning-material.service";
+import { LearningMaterialController } from "./learning-material.controller";
+import { LearningMaterial } from "src/entities/learning-material.entity";
+import minioConfig from "src/config/minio.config";
 
 @Module({
   imports: [
     ConfigModule.forFeature(minioConfig),
+    TypeOrmModule.forFeature([LearningMaterial]),
   ],
   controllers: [LearningMaterialController],
   providers: [
