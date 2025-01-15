@@ -13,6 +13,7 @@ import { CreateLabDto } from "./dto/create-lab.dto";
 import { UpdateLabDto } from "./dto/update-lab.dto";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth/jwt-auth.guard";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { SupervisorGuard } from "src/user/guards/role.guard";
 
 @Controller("lab")
 @ApiTags("lab")
@@ -20,7 +21,7 @@ export class LabController {
   constructor(private readonly labService: LabService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, SupervisorGuard)
   @ApiBearerAuth("access-token")
   create(@Body() createLabDto: CreateLabDto) {
     return this.labService.create(createLabDto);
@@ -34,14 +35,14 @@ export class LabController {
   }
 
   @Patch(":name")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, SupervisorGuard)
   @ApiBearerAuth("access-token")
   update(@Param("name") name: string, @Body() updateLabDto: UpdateLabDto) {
     return this.labService.update(name, updateLabDto);
   }
 
   @Delete(":name")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, SupervisorGuard)
   @ApiBearerAuth("access-token")
   remove(@Param("name") name: string) {
     return this.labService.remove(name);

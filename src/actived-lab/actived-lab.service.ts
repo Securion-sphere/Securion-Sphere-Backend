@@ -7,7 +7,6 @@ import { randomBytes, randomInt } from "crypto";
 import { ConfigService } from "@nestjs/config";
 import { User } from "src/entities/user.entity";
 import { Lab } from "src/entities/lab.entity";
-import { DeleteLabInstanceDto } from "./dto/deactivated-lab.dto";
 import { SubmitFlagDto } from "./dto/submit-flag.dto";
 import { CreateLabInstanceReturnDto } from "./dto/create-lab-instance-return.dto";
 import axios from "axios";
@@ -28,7 +27,7 @@ export class ActivedLabService {
   ) {}
 
   async active(
-    createLabInstanceDto: CreateLabInstanceDto,
+    createLabInstanceDto: CreateLabInstanceDto & { userId: number },
   ): Promise<CreateLabInstanceReturnDto> {
     const port = randomInt(30000, 50001);
     const ip = this.configService.get<string>("docker.host");
@@ -93,9 +92,9 @@ export class ActivedLabService {
     return { id: resId, instanceOwner, instanceLab, ip: resIp, port: resPort };
   }
 
-  async deactivate(deleteLabInstanceDto: DeleteLabInstanceDto) {
+  async deactivate(userId: number) {
     const owner = await this.userRepository.findOneBy({
-      id: deleteLabInstanceDto.userId,
+      id: userId,
     });
 
     const dockerApiUrl = this.configService.get<string>("docker.api");
@@ -104,7 +103,7 @@ export class ActivedLabService {
       throw new Error("User not found");
     }
 
-    await this.userRepository.update(deleteLabInstanceDto.userId, {
+    await this.userRepository.update(userId, {
       activate_lab: null,
     });
 
@@ -129,7 +128,7 @@ export class ActivedLabService {
     return { msg: "Successfully stop instance" };
   }
 
-  async submitFlag(submitFlagDto: SubmitFlagDto) {
+  async submitFlag(submitFlagDto: SubmitFlagDto & { userId: number }) {
     const { userId, flag } = submitFlagDto;
     const owner = await this.userRepository.findOne({
       where: { id: userId },
@@ -162,35 +161,6 @@ export class ActivedLabService {
     } else {
       return { msg: "Flag is not correct" };
     }
-    // console.log(activatedLab);
-    // // Optionally, clear the existing `actived_machine`
-    // await this.userRepository.update(userId, {
-    //   activate_lab: null,
-    // });
-
-    // // Find the lab to be removed
-    // const lab = await this.activeLabRepository.findOne({
-    //   where: { instanceOwner: owner },
-    // });
-    // console.log("Activated Lab Instance Lab:", activatedLab.instanceLab);
-
-    // // Check if instanceLab is correctly set
-    // if (!activatedLab.instanceLab) {
-    //   return { msg: "Activated lab does not have an instanceLab" };
-    // }
-
-    // // Push the new `solved_machine` item
-    // // owner.solved_machine.push(activatedLab.instanceLab);
-
-    // // console.log("Updated Solved Machine Array:", owner.solved_machine);
-
-    // // Save the updated `owner` entity
-    // await this.userRepository.save(owner);
-
-    // // Remove the `lab` from `activeLabRepository`
-    // if (lab) {
-    //   await this.activeLabRepository.remove(lab);
-    // }
   }
 
   async getInstance(id: number) {

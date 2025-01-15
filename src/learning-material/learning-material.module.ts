@@ -6,11 +6,13 @@ import { LearningMaterialService } from "./learning-material.service";
 import { LearningMaterialController } from "./learning-material.controller";
 import { LearningMaterial } from "src/entities/learning-material.entity";
 import minioConfig from "src/config/minio.config";
+import { User } from "src/entities/user.entity";
+import { Supervisor } from "src/entities/supervisor.entity";
 
 @Module({
   imports: [
     ConfigModule.forFeature(minioConfig),
-    TypeOrmModule.forFeature([LearningMaterial]),
+    TypeOrmModule.forFeature([LearningMaterial, User, Supervisor]),
   ],
   controllers: [LearningMaterialController],
   providers: [

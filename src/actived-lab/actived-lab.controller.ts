@@ -11,7 +11,6 @@ import { ActivedLabService } from "./actived-lab.service";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth/jwt-auth.guard";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { CreateLabInstanceDto } from "./dto/active-lab.dto";
-import { DeleteLabInstanceDto } from "./dto/deactivated-lab.dto";
 import { SubmitFlagDto } from "./dto/submit-flag.dto";
 import { GetLabInstanceResponseDto } from "./dto/get-instance.dto";
 
@@ -23,22 +22,28 @@ export class ActivedLabController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
-  async active(@Body() createLabInstanceDto: CreateLabInstanceDto) {
-    return this.activedLabService.active(createLabInstanceDto);
+  async active(@Req() req, @Body() createLabInstanceDto: CreateLabInstanceDto) {
+    return this.activedLabService.active({
+      userId: req.user.id,
+      ...createLabInstanceDto,
+    });
   }
 
   @Delete()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
-  async deactivate(@Body() deleteLabInstanceDto: DeleteLabInstanceDto) {
-    return this.activedLabService.deactivate(deleteLabInstanceDto);
+  async deactivate(@Req() req) {
+    return this.activedLabService.deactivate(req.user.id);
   }
 
   @Post("submit-flag")
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
-  async submitFlag(@Body() submitFlagDto: SubmitFlagDto) {
-    return this.activedLabService.submitFlag(submitFlagDto);
+  async submitFlag(@Req() req, @Body() submitFlagDto: SubmitFlagDto) {
+    return this.activedLabService.submitFlag({
+      userId: req.user.id,
+      ...submitFlagDto,
+    });
   }
 
   @Get("get-instance")

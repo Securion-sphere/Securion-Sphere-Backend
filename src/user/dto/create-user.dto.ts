@@ -12,6 +12,10 @@ export class CreateUserDto {
 
   @ApiProperty()
   @IsString()
+  nichName: string;
+
+  @ApiProperty()
+  @IsString()
   @IsEmail()
   @Matches(/^\d{8}@kmitl\.ac\.th$/)
   @Matches(/^[a-zA-Z]+(\.[a-zA-Z]+)?@kmitl\.ac\.th$/)

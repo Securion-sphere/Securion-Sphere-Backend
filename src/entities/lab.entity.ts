@@ -36,5 +36,5 @@ export class Lab {
   solved_by: Solvation[];
 
   @Column({ type: "boolean", default: false })
-  isActive: boolean;
+  isReady: boolean;
 }
