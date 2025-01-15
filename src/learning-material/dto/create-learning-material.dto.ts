@@ -12,10 +12,10 @@ export class CreateLearningMaterialDto {
   @IsNotEmpty()
   description: string;
 
-  @ApiPropertyOptional({ type: "string", format: "binary" })
+  @ApiPropertyOptional({ type: ["string"], format: "binary", maximum: 5 })
   @IsOptional()
-  image?: Express.Multer.File;
+  image?: Express.Multer.File[];
 
-  @ApiProperty({ type: "string", format: "binary" })
-  file: Express.Multer.File;
+  @ApiProperty({ type: ["string"], format: "binary", maximum: 5 })
+  file: Express.Multer.File[];
 }

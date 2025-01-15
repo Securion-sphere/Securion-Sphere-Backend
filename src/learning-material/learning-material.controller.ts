@@ -13,7 +13,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
-import { ApiConsumes, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiConsumes, ApiTags } from "@nestjs/swagger";
 import { LearningMaterialService } from "./learning-material.service";
 import { CreateLearningMaterialDto } from "./dto/create-learning-material.dto";
 import { UpdateLearningMaterialDto } from "./dto/update-learning-material.dto";
@@ -28,12 +28,13 @@ export class LearningMaterialController {
   ) {}
 
   @Post()
+  @ApiBearerAuth("access-token")
   @UseGuards(JwtAuthGuard, SupervisorGuard)
   @ApiConsumes("multipart/form-data")
   @UseInterceptors(
     FileFieldsInterceptor([
-      { name: "image", maxCount: 1 },
-      { name: "file", maxCount: 1 },
+      { name: "image", maxCount: 5 },
+      { name: "file", maxCount: 5 },
     ]),
   )
   create(
@@ -51,18 +52,21 @@ export class LearningMaterialController {
   }
 
   @Get()
+  @ApiBearerAuth("access-token")
   @UseGuards(JwtAuthGuard)
   findAll() {
     return this.learningMaterialService.findAll();
   }
 
   @Get(":id")
+  @ApiBearerAuth("access-token")
   @UseGuards(JwtAuthGuard)
   findOne(@Param("id") id: string) {
     return this.learningMaterialService.findOne(+id);
   }
 
   @Patch(":id")
+  @ApiBearerAuth("access-token")
   @UseGuards(JwtAuthGuard, SupervisorGuard)
   @ApiConsumes("multipart/form-data")
   @UseInterceptors(
@@ -88,12 +92,14 @@ export class LearningMaterialController {
   }
 
   @Delete(":id")
+  @ApiBearerAuth("access-token")
   @UseGuards(JwtAuthGuard, SupervisorGuard)
   remove(@Param("id") id: string) {
     return this.learningMaterialService.remove(+id);
   }
 
   @Get("download/:id")
+  @ApiBearerAuth("access-token")
   @UseGuards(JwtAuthGuard)
   async downloadFile(@Param("id") id: number): Promise<StreamableFile> {
     const fileStream = await this.learningMaterialService.getFile(id);
