@@ -1,19 +1,56 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from "@nestjs/common";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { LabImage } from "src/entities/lab-image.entity";
 import { CreateLabImageDto } from "./dto/create-lab-image.dto";
 import { UpdateLabImageDto } from "./dto/update-lab-image.dto";
+import { HttpService } from "@nestjs/axios";
+import { ConfigService } from "@nestjs/config";
+import * as FormData from "form-data";
+import { catchError, lastValueFrom } from "rxjs";
+import { ImageUploadRes } from "./types/imageUpload";
+import { AxiosError } from "axios";
 
 @Injectable()
 export class LabImageService {
   constructor(
     @InjectRepository(LabImage)
-    private labImageRepository: Repository<LabImage>,
+    private readonly labImageRepository: Repository<LabImage>,
+    private readonly httpService: HttpService,
+    private readonly configService: ConfigService,
   ) {}
 
-  async create(createLabImageDto: CreateLabImageDto): Promise<LabImage> {
-    const newLabImage = this.labImageRepository.create(createLabImageDto);
+  async create(
+    createLabImageDto: CreateLabImageDto,
+    file: Express.Multer.File,
+  ): Promise<LabImage> {
+    if (!file || !file.buffer) {
+      throw new BadRequestException("No file uploaded");
+    }
+    const dockerApiUrl = this.configService.get<string>("docker.api");
+
+    const form = new FormData();
+    form.append("file", Buffer.from(file.buffer), {
+      filename: file.originalname,
+      contentType: file.mimetype,
+    });
+
+    const { data } = await lastValueFrom(
+      this.httpService.post<ImageUploadRes>(dockerApiUrl + "/image", form).pipe(
+        catchError((error: AxiosError) => {
+          throw error;
+        }),
+      ),
+    );
+
+    const newLabImage = this.labImageRepository.create({
+      image_id: data.Name,
+      ...createLabImageDto,
+    });
     return this.labImageRepository.save(newLabImage);
   }
 

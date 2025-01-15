@@ -7,13 +7,16 @@ import {
   Param,
   Delete,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
 } from "@nestjs/common";
 import { LabImageService } from "./lab-image.service";
 import { CreateLabImageDto } from "./dto/create-lab-image.dto";
 import { UpdateLabImageDto } from "./dto/update-lab-image.dto";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth/jwt-auth.guard";
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiConsumes, ApiTags } from "@nestjs/swagger";
 import { SupervisorGuard } from "src/user/guards/role.guard";
+import { FileInterceptor } from "@nestjs/platform-express";
 
 @Controller("lab-image")
 @ApiTags("lab-image")
@@ -23,8 +26,13 @@ export class LabImageController {
   @Post()
   @ApiBearerAuth("access-token")
   @UseGuards(JwtAuthGuard, SupervisorGuard)
-  create(@Body() createLabDto: CreateLabImageDto) {
-    return this.labImageService.create(createLabDto);
+  @ApiConsumes("multipart/form-data")
+  @UseInterceptors(FileInterceptor("file"))
+  create(
+    @Body() createLabDto: CreateLabImageDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.labImageService.create(createLabDto, file);
   }
 
   @Get()

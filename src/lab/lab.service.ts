@@ -11,12 +11,12 @@ import { LabImage } from "src/entities/lab-image.entity";
 export class LabService {
   constructor(
     @InjectRepository(Lab)
-    private labRepository: Repository<Lab>,
+    private readonly labRepository: Repository<Lab>,
     @InjectRepository(Supervisor)
     private readonly supervisorRepository: Repository<Supervisor>,
     @InjectRepository(LabImage)
     private readonly labImageRepository: Repository<LabImage>,
-    private dataSource: DataSource,
+    private readonly dataSource: DataSource,
   ) {}
 
   async create(createLabDto: CreateLabDto): Promise<Lab> {
