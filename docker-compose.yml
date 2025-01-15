@@ -35,6 +35,7 @@ services:
       - REFRESH_JWT_SECRET
       - REFRESH_JWT_EXPIRE_IN
       - FRONTEND_URL
+      - NODE_ENV
       - TZ
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:${APP_PORT}/"]

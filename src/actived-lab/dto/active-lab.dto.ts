@@ -4,8 +4,4 @@ export class CreateLabInstanceDto {
   @ApiProperty({ type: Number })
   @IsInt()
   labId: number;
-
-  @ApiProperty({ type: Number })
-  @IsInt()
-  userId: number;
 }

@@ -44,9 +44,21 @@ export class LabService {
   }
 
   async findAll() {
-    const labs = await this.labRepository.find({
-      relations: ["creator"],
-    });
+    const labs = await this.labRepository
+      .createQueryBuilder("lab")
+      .leftJoinAndSelect("lab.creator", "creator")
+      .leftJoinAndSelect("creator.user", "user")
+      .select([
+        "lab.id",
+        "lab.name",
+        "lab.description",
+        "lab.point",
+        "lab.category",
+        "lab.isReady",
+        "creator.id",
+        "user.nickName",
+      ])
+      .getMany();
 
     return labs.map((lab) => ({
       id: lab.id,
@@ -54,7 +66,7 @@ export class LabService {
       description: lab.description,
       point: lab.point,
       category: lab.category,
-      isActive: lab.isActive,
+      isActive: lab.isReady,
       creatorName: lab.creator?.user?.nickName || "Unknown",
     }));
   }

@@ -5,9 +5,10 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import { Lab } from "src/entities/lab.entity";
 import { Supervisor } from "src/entities/supervisor.entity";
 import { LabImage } from "src/entities/lab-image.entity";
+import { User } from "src/entities/user.entity";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Lab, Supervisor, LabImage])],
+  imports: [TypeOrmModule.forFeature([Lab, Supervisor, User, LabImage])],
   controllers: [LabController],
   providers: [LabService],
 })

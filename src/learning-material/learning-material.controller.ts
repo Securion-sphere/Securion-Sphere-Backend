@@ -2,7 +2,6 @@ import {
   Controller,
   Get,
   Post,
-  Put,
   Delete,
   Body,
   Param,
@@ -10,12 +9,16 @@ import {
   UseInterceptors,
   StreamableFile,
   NotFoundException,
+  Patch,
+  UseGuards,
 } from "@nestjs/common";
 import { FileFieldsInterceptor } from "@nestjs/platform-express";
 import { ApiConsumes, ApiTags } from "@nestjs/swagger";
 import { LearningMaterialService } from "./learning-material.service";
 import { CreateLearningMaterialDto } from "./dto/create-learning-material.dto";
 import { UpdateLearningMaterialDto } from "./dto/update-learning-material.dto";
+import { JwtAuthGuard } from "src/auth/guards/jwt-auth/jwt-auth.guard";
+import { SupervisorGuard } from "src/user/guards/role.guard";
 
 @Controller("learning-material")
 @ApiTags("learning-material")
@@ -25,6 +28,7 @@ export class LearningMaterialController {
   ) {}
 
   @Post()
+  @UseGuards(JwtAuthGuard, SupervisorGuard)
   @ApiConsumes("multipart/form-data")
   @UseInterceptors(
     FileFieldsInterceptor([
@@ -47,16 +51,19 @@ export class LearningMaterialController {
   }
 
   @Get()
+  @UseGuards(JwtAuthGuard)
   findAll() {
     return this.learningMaterialService.findAll();
   }
 
   @Get(":id")
+  @UseGuards(JwtAuthGuard)
   findOne(@Param("id") id: string) {
     return this.learningMaterialService.findOne(+id);
   }
 
-  @Put(":id")
+  @Patch(":id")
+  @UseGuards(JwtAuthGuard, SupervisorGuard)
   @ApiConsumes("multipart/form-data")
   @UseInterceptors(
     FileFieldsInterceptor([
@@ -81,11 +88,13 @@ export class LearningMaterialController {
   }
 
   @Delete(":id")
+  @UseGuards(JwtAuthGuard, SupervisorGuard)
   remove(@Param("id") id: string) {
     return this.learningMaterialService.remove(+id);
   }
 
   @Get("download/:id")
+  @UseGuards(JwtAuthGuard)
   async downloadFile(@Param("id") id: number): Promise<StreamableFile> {
     const fileStream = await this.learningMaterialService.getFile(id);
     if (!fileStream) {

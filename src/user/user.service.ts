@@ -3,7 +3,7 @@ import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { Repository } from "typeorm";
 import { User } from "src/entities/user.entity";
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { Student } from "src/entities/student.entity";
 import { Supervisor } from "src/entities/supervisor.entity";
 import { Role } from "./types/role";
@@ -63,19 +63,51 @@ export class UserService {
   async findOne(id: number) {
     const user = await this.userRepo.findOne({
       where: { id },
-      relations: ["student", "supervisor", "student.solved_lab"],
+      relations: [
+        "student",
+        "supervisor",
+        "student.solved_lab",
+        "supervisor.labs",
+      ],
     });
+
+    if (user) {
+      if (!user.student) {
+        delete user.student;
+      }
+      if (!user.supervisor) {
+        delete user.supervisor;
+      }
+    }
 
     return user;
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    // Check if the user exists
+    const user = await this.userRepo.findOneBy({ id });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    // Update the user entity with new values
+    Object.assign(user, updateUserDto);
+
+    // Save the updated user to the database
+    return this.userRepo.save(user);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} user`;
+  async remove(id: number) {
+    // Check if the user exists
+    const user = await this.userRepo.findOneBy({ id });
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    // Delete the user from the database
+    await this.userRepo.delete(id);
+
+    return { message: `User with ID ${id} has been removed` };
   }
 
   async updateHashedRefreshToken(userId: number, hashedRefreshToken: string) {

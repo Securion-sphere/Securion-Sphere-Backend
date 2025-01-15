@@ -41,9 +41,11 @@ export class AuthController {
 
   @Get("bypass-google-login-na-krub/:id")
   async bypassLoginNakrub(@Param("id") id: number) {
-    const response = await this.authService.login(id);
+    if (this.configService.get<string>("NODE_ENV") !== "production") {
+      const response = await this.authService.login(id);
 
-    return response;
+      return response;
+    }
   }
 
   @UseGuards(RefreshAuthGuard)
