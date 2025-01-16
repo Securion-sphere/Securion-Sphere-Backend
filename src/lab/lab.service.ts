@@ -120,10 +120,10 @@ export class LabService {
     return this.labRepository.remove(lab);
   }
 
-  async getSolved(name: string) {
+  async getSolved(id: number): Promise<number> {
     const solved = await this.dataSource.query(
-      `SELECT COUNT(solved_machine) FROM student WHERE solved_machine = $1`,
-      [name],
+      `SELECT COUNT("studentId") FROM solvation WHERE "labId" = $1;`,
+      [id],
     );
     return solved;
   }
