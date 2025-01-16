@@ -22,6 +22,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
+  @ApiBearerAuth("access-token")
   @UseGuards(JwtAuthGuard, SupervisorGuard)
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);

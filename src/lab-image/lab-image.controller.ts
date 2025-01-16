@@ -45,14 +45,17 @@ export class LabImageController {
   @Patch(":name")
   @UseGuards(JwtAuthGuard, SupervisorGuard)
   @ApiBearerAuth("access-token")
+  @ApiConsumes("multipart/form-data")
+  @UseInterceptors(FileInterceptor("file"))
   update(
-    @Param("name") name: string,
+    @Param("id") id: string,
     @Body() updateLabImageDto: UpdateLabImageDto,
+    @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.labImageService.update(name, updateLabImageDto);
+    return this.labImageService.update(id, updateLabImageDto, file);
   }
 
-  @Delete(":name")
+  @Delete(":id")
   @UseGuards(JwtAuthGuard, SupervisorGuard)
   @ApiBearerAuth("access-token")
   remove(@Param("name") name: string) {

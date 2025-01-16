@@ -17,6 +17,8 @@ import { AxiosError } from "axios";
 
 @Injectable()
 export class LabImageService {
+  dockerApiUrl = this.configService.get<string>("docker.api");
+
   constructor(
     @InjectRepository(LabImage)
     private readonly labImageRepository: Repository<LabImage>,
@@ -31,7 +33,6 @@ export class LabImageService {
     if (!file || !file.buffer) {
       throw new BadRequestException("No file uploaded");
     }
-    const dockerApiUrl = this.configService.get<string>("docker.api");
 
     const form = new FormData();
     form.append("file", Buffer.from(file.buffer), {
@@ -40,11 +41,13 @@ export class LabImageService {
     });
 
     const { data } = await lastValueFrom(
-      this.httpService.post<ImageUploadRes>(dockerApiUrl + "/image", form).pipe(
-        catchError((error: AxiosError) => {
-          throw error;
-        }),
-      ),
+      this.httpService
+        .post<ImageUploadRes>(this.dockerApiUrl + "/image", form)
+        .pipe(
+          catchError((error: AxiosError) => {
+            throw error;
+          }),
+        ),
     );
 
     const newLabImage = this.labImageRepository.create({
@@ -62,8 +65,28 @@ export class LabImageService {
     return this.labImageRepository.findOne({ where: { name } });
   }
 
-  async update(name: string, updateLabImageDto: UpdateLabImageDto) {
-    const lab = await this.findByName(name);
+  async update(
+    id: string,
+    updateLabImageDto: UpdateLabImageDto,
+    file: Express.Multer.File,
+  ) {
+    const form = new FormData();
+    form.append("file", Buffer.from(file.buffer), {
+      filename: file.originalname,
+      contentType: file.mimetype,
+    });
+
+    // const { data } = await lastValueFrom(
+    //   this.httpService
+    //     .<ImageUploadRes>(this.dockerApiUrl + "/image", form)
+    //     .pipe(
+    //       catchError((error: AxiosError) => {
+    //         throw error;
+    //       }),
+    //     ),
+    // );
+
+    const lab = await this.findByName(id);
     if (!lab) {
       throw new NotFoundException();
     } else {

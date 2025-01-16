@@ -38,11 +38,15 @@ services:
       - NODE_ENV
       - TZ
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:${APP_PORT}/"]
+      test:
+        [
+          "CMD-SHELL",
+          "curl --fail http://localhost:${APP_PORT}/health || exit 1",
+        ]
       interval: 30s
       retries: 3
       start_period: 30s
-      timeout: 30s
+      timeout: 10s
 
   securion-pg:
     image: postgres
