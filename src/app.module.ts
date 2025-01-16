@@ -10,6 +10,7 @@ import { LabModule } from "./lab/lab.module";
 import { LabImageModule } from "./lab-image/lab-image.module";
 import { ActivedLabModule } from "./actived-lab/actived-lab.module";
 import { LearningMaterialModule } from "./learning-material/learning-material.module";
+import { StudentModule } from "./student/student.module";
 import dockerConfig from "./config/docker.config";
 import googleOauthConfig from "./config/google-oauth.config";
 import jwtConfig from "./config/jwt.config";
@@ -45,6 +46,7 @@ import typeorm from "./config/typeorm.config";
     LabImageModule,
     ActivedLabModule,
     LearningMaterialModule,
+    StudentModule,
   ],
   controllers: [AppController],
   providers: [AppService],

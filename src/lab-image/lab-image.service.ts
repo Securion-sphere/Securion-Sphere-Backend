@@ -11,7 +11,7 @@ import { UpdateLabImageDto } from "./dto/update-lab-image.dto";
 import { HttpService } from "@nestjs/axios";
 import { ConfigService } from "@nestjs/config";
 import * as FormData from "form-data";
-import { catchError, lastValueFrom } from "rxjs";
+import { catchError, lastValueFrom, throwError } from "rxjs";
 import { ImageUploadRes } from "./types/imageUpload";
 import { AxiosError } from "axios";
 
@@ -45,7 +45,7 @@ export class LabImageService {
         .post<ImageUploadRes>(this.dockerApiUrl + "/image", form)
         .pipe(
           catchError((error: AxiosError) => {
-            throw error;
+            return throwError(() => error);
           }),
         ),
     );

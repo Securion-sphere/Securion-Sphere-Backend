@@ -86,8 +86,17 @@ export class UserService {
   async update(id: number, updateUserDto: UpdateUserDto) {
     // Check if the user exists
     const user = await this.userRepo.findOneBy({ id });
+
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    if (updateUserDto.student) {
+      const student = await this.studentRepo.findOneBy({ user });
+      if (!student) throw new NotFoundException(`This user is not a student`);
+
+      Object.assign(student, updateUserDto.student);
+      await this.studentRepo.save(student);
     }
 
     // Update the user entity with new values

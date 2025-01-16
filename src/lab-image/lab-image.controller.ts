@@ -55,7 +55,7 @@ export class LabImageController {
     return this.labImageService.update(id, updateLabImageDto, file);
   }
 
-  @Delete(":id")
+  @Delete(":name")
   @UseGuards(JwtAuthGuard, SupervisorGuard)
   @ApiBearerAuth("access-token")
   remove(@Param("name") name: string) {
