@@ -34,6 +34,13 @@ export class LabController {
     return this.labService.findAll();
   }
 
+  @Get(":id")
+  @UseGuards(JwtAuthGuard, SupervisorGuard)
+  @ApiBearerAuth("access-token")
+  findOne(@Param("id") id: number) {
+    return this.labService.findOne(id);
+  }
+
   @Patch(":name")
   @UseGuards(JwtAuthGuard, SupervisorGuard)
   @ApiBearerAuth("access-token")

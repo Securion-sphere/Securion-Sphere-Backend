@@ -48,6 +48,9 @@ export class LabService {
       .createQueryBuilder("lab")
       .leftJoinAndSelect("lab.creator", "creator")
       .leftJoinAndSelect("creator.user", "user")
+      .leftJoinAndSelect("lab.solved_by", "solvation")
+      .leftJoinAndSelect("solvation.student", "student")
+      .leftJoinAndSelect("student.user", "studentUser")
       .select([
         "lab.id",
         "lab.name",
@@ -57,18 +60,53 @@ export class LabService {
         "lab.isReady",
         "creator.id",
         "user.nickName",
+        "solvation",
+        "student",
+        "studentUser.nickName",
       ])
       .getMany();
 
-    return labs.map((lab) => ({
+    return labs;
+  }
+
+  async findOne(id: number) {
+    const lab = await this.labRepository
+      .createQueryBuilder("lab")
+      .leftJoinAndSelect("lab.creator", "creator")
+      .leftJoinAndSelect("creator.user", "user")
+      .leftJoinAndSelect("lab.solved_by", "solvation")
+      .leftJoinAndSelect("solvation.student", "student")
+      .leftJoinAndSelect("student.user", "studentUser")
+      .select([
+        "lab.id",
+        "lab.name",
+        "lab.description",
+        "lab.point",
+        "lab.category",
+        "lab.isReady",
+        "creator.id",
+        "user.nickName",
+        "solvation",
+        "student",
+        "studentUser.nickName",
+      ])
+      .where("lab.id = :id", { id })
+      .getOne();
+
+    if (!lab) {
+      throw new NotFoundException("Lab not found");
+    }
+
+    return {
       id: lab.id,
       name: lab.name,
       description: lab.description,
       point: lab.point,
       category: lab.category,
-      isActive: lab.isReady,
-      creatorName: lab.creator?.user?.nickName || "Unknown",
-    }));
+      isReady: lab.isReady,
+      creatorName: lab.creator?.user?.nickName || "unknown",
+      solvedBy: lab.solved_by,
+    };
   }
 
   async findByName(name: string) {
