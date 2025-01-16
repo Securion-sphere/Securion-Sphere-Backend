@@ -56,20 +56,97 @@ export class UserService {
     });
   }
 
-  findAll() {
-    return `This action returns all user`;
+  async findAll() {
+    const users = await this.userRepo
+      .createQueryBuilder("user")
+      .leftJoinAndSelect("user.student", "student")
+      .leftJoinAndSelect("student.solved_lab", "solvation")
+      .leftJoinAndSelect("solvation.lab", "solvedLab")
+      .leftJoinAndSelect("user.supervisor", "supervisor")
+      .leftJoinAndSelect("supervisor.labs", "createdLab")
+      .select([
+        "user.id",
+        "user.firstName",
+        "user.lastName",
+        "user.nickName",
+        "user.profile_img",
+        "user.email",
+        "student",
+        "solvation",
+        "solvedLab.id",
+        "solvedLab.name",
+        "solvedLab.category",
+        "solvedLab.point",
+        "supervisor",
+        "createdLab.id",
+        "createdLab.name",
+        "createdLab.category",
+        "createdLab.point",
+      ])
+      .getMany();
+
+    return users.map((user) => {
+      if (user) {
+        if (!user.student) {
+          delete user.student;
+        }
+        if (!user.supervisor) {
+          delete user.supervisor;
+        }
+      }
+
+      let totalScore = 0;
+      if (user.student) {
+        totalScore = user.student.solved_lab.reduce((score, solvation) => {
+          return score + solvation.lab.point;
+        }, 0);
+      }
+
+      return {
+        ...user,
+        ...(user.supervisor ? { supervisor: user.supervisor } : {}),
+        ...(user.student
+          ? {
+              student: {
+                year: user.student.year,
+                score: totalScore,
+                solved_lab: user.student.solved_lab,
+              },
+            }
+          : {}),
+      };
+    });
   }
 
   async findOne(id: number) {
-    const user = await this.userRepo.findOne({
-      where: { id },
-      relations: [
+    const user = await this.userRepo
+      .createQueryBuilder("user")
+      .leftJoinAndSelect("user.student", "student")
+      .leftJoinAndSelect("student.solved_lab", "solvation")
+      .leftJoinAndSelect("solvation.lab", "solvedLab")
+      .leftJoinAndSelect("user.supervisor", "supervisor")
+      .leftJoinAndSelect("supervisor.labs", "createdLab")
+      .select([
+        "user.id",
+        "user.firstName",
+        "user.lastName",
+        "user.nickName",
+        "user.profile_img",
+        "user.email",
         "student",
+        "solvation",
+        "solvedLab.id",
+        "solvedLab.name",
+        "solvedLab.category",
+        "solvedLab.point",
         "supervisor",
-        "student.solved_lab",
-        "supervisor.labs",
-      ],
-    });
+        "createdLab.id",
+        "createdLab.name",
+        "createdLab.category",
+        "createdLab.point",
+      ])
+      .where("user.id = :id", { id })
+      .getOne();
 
     if (user) {
       if (!user.student) {
@@ -80,7 +157,23 @@ export class UserService {
       }
     }
 
-    return user;
+    let totalScore = 0;
+    if (user && user.student) {
+      totalScore = user.student.solved_lab.reduce((score, solvation) => {
+        return score + solvation.lab.point; // Add up the points for each solved lab
+      }, 0);
+    }
+
+    return {
+      ...user,
+      ...(user.student && {
+        student: {
+          year: user.student.year,
+          score: totalScore,
+          solved_lab: user.student.solved_lab,
+        },
+      }),
+    };
   }
 
   async update(id: number, updateUserDto: UpdateUserDto) {

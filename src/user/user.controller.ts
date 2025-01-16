@@ -28,6 +28,13 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
+  @Get()
+  @ApiBearerAuth("access-token")
+  @UseGuards(JwtAuthGuard)
+  findAll() {
+    return this.userService.findAll();
+  }
+
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
   @Get("profile")
