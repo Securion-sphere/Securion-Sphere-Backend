@@ -41,17 +41,17 @@ export class LabController {
     return this.labService.findOne(id);
   }
 
-  @Patch(":name")
+  @Patch(":id")
   @UseGuards(JwtAuthGuard, SupervisorGuard)
   @ApiBearerAuth("access-token")
-  update(@Param("name") name: string, @Body() updateLabDto: UpdateLabDto) {
-    return this.labService.update(name, updateLabDto);
+  update(@Param("id") id: number, @Body() updateLabDto: UpdateLabDto) {
+    return this.labService.updateById(id, updateLabDto);
   }
 
-  @Delete(":name")
+  @Delete(":id")
   @UseGuards(JwtAuthGuard, SupervisorGuard)
   @ApiBearerAuth("access-token")
-  remove(@Param("name") name: string) {
-    return this.labService.remove(name);
+  remove(@Param("id") id: number) {
+    return this.labService.removeById(id);
   }
 }
