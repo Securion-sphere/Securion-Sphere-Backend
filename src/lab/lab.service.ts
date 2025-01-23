@@ -109,19 +109,14 @@ export class LabService {
     };
   }
 
-  async findByName(name: string) {
-    return this.labRepository.findOne({ where: { name } });
-  }
-
-  async update(name: string, updateLabDto: UpdateLabDto) {
-    const lab = await this.findByName(name);
+  async updateById(id: number, updateLabDto: UpdateLabDto) {
+    const lab = await this.labRepository.findOne({ where: { id } });
     if (!lab) {
       throw new NotFoundException();
     }
 
     const { creatorId, labImageId, ...labDto } = updateLabDto;
 
-    // Fetch related entities (creator and labImage) by their IDs
     const creator = await this.supervisorRepository.findOne({
       where: { id: creatorId },
     });
@@ -136,22 +131,20 @@ export class LabService {
       throw new NotFoundException(`LabImage with id ${labImageId} not found`);
     }
 
-    // Update the lab entity
-    await this.labRepository.update(lab.id, {
+    await this.labRepository.update(id, {
       ...labDto,
       creator,
       labImage,
     });
 
-    // Return the updated lab entity
     return this.labRepository.findOne({
-      where: { id: lab.id },
+      where: { id },
       relations: ["labImage", "creator"],
     });
   }
 
-  async remove(name: string) {
-    const lab = await this.findByName(name);
+  async removeById(id: number) {
+    const lab = await this.labRepository.findOne({ where: { id } });
     if (!lab) {
       throw new NotFoundException();
     }

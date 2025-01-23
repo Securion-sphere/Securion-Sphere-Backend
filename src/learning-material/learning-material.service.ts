@@ -14,6 +14,7 @@ import { CreateLearningMaterialDto } from "./dto/create-learning-material.dto";
 import { UpdateLearningMaterialDto } from "./dto/update-learning-material.dto";
 import minioConfig from "src/config/minio.config";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import * as path from "path";
 
 @Injectable()
 export class LearningMaterialService {
@@ -40,14 +41,22 @@ export class LearningMaterialService {
       throw new Error("Main file is required");
     }
 
+    // Determine file type and set appropriate base path
+    const isMarkdown =
+      mainFile.mimetype.includes("markdown") ||
+      mainFile.originalname.toLowerCase().endsWith(".md");
+    const basePath = isMarkdown
+      ? `learning-material/md/${Date.now()}-${path.parse(mainFile.originalname).name}/`
+      : `learning-material/pdf/${Date.now()}-${path.parse(mainFile.originalname).name}/`;
+
     // Upload main file
-    const fileKey = `learning-material/${Date.now()}-${mainFile.originalname}`;
+    const fileKey = `${basePath}${mainFile.originalname}`;
     await this.uploadToMinio(fileKey, mainFile);
 
     // Upload image if provided
     let imageKey = null;
     if (imageFile) {
-      imageKey = `learning-material/images/${Date.now()}-${imageFile.originalname}`;
+      imageKey = `${basePath}background-image${path.extname(imageFile.originalname)}`;
       await this.uploadToMinio(imageKey, imageFile);
     }
 
@@ -56,11 +65,74 @@ export class LearningMaterialService {
       description,
       fileName: mainFile.originalname,
       fileKey, // Store only the file key
-      fileType: mainFile.mimetype.includes("pdf") ? "pdf" : "md",
+      fileType: isMarkdown ? "md" : "pdf",
       imageKey, // Store only the image key
     });
 
     return this.learningMaterialRepository.save(learningMaterial);
+  }
+
+  async update(
+    id: number,
+    updateLearningMaterialDto: UpdateLearningMaterialDto,
+    files: {
+      image?: Express.Multer.File[];
+      file?: Express.Multer.File[];
+    },
+  ) {
+    const material = await this.findOne(id);
+    const { title, description } = updateLearningMaterialDto;
+    const mainFile = files.file?.[0];
+    const imageFile = files.image?.[0];
+
+    // Update basic info
+    if (title) material.title = title;
+    if (description) material.description = description;
+
+    // Update main file if provided
+    if (mainFile) {
+      // Delete old file
+      if (material.fileKey) {
+        await this.deleteFromMinio(material.fileKey);
+      }
+
+      // Determine file type and set appropriate base path
+      const isMarkdown =
+        mainFile.mimetype.includes("markdown") ||
+        mainFile.originalname.toLowerCase().endsWith(".md");
+      const basePath = isMarkdown
+        ? `learning-material/md/${Date.now()}-${path.parse(mainFile.originalname).name}/`
+        : `learning-material/pdf/${Date.now()}-${path.parse(mainFile.originalname).name}/`;
+
+      // Upload new file
+      const fileKey = `${basePath}${mainFile.originalname}`;
+      await this.uploadToMinio(fileKey, mainFile);
+
+      material.fileName = mainFile.originalname;
+      material.fileKey = fileKey; // Update file key
+      material.fileType = isMarkdown ? "md" : "pdf";
+    }
+
+    // Update image if provided
+    if (imageFile) {
+      // Delete old image
+      if (material.imageKey) {
+        await this.deleteFromMinio(material.imageKey);
+      }
+
+      // Extract basePath from the existing fileKey
+      const basePath = material.fileKey
+        ? material.fileKey.substring(0, material.fileKey.lastIndexOf("/") + 1)
+        : `learning-material/${material.fileType}/${Date.now()}-${path.parse(material.fileName).name}/`;
+
+      // Upload new image using the same basePath
+      const imageKey = `${basePath}background-image${path.extname(imageFile.originalname)}`;
+      await this.uploadToMinio(imageKey, imageFile);
+
+      material.imageKey = imageKey; // Update image key
+    }
+
+    return this.learningMaterialRepository.save(material);
   }
 
   private async generatePresignedUrl(
@@ -123,56 +195,6 @@ export class LearningMaterialService {
       filePresignedUrl: fileUrl,
       imagePresignedUrl: imageUrl,
     };
-  }
-
-  async update(
-    id: number,
-    updateLearningMaterialDto: UpdateLearningMaterialDto,
-    files: {
-      image?: Express.Multer.File[];
-      file?: Express.Multer.File[];
-    },
-  ) {
-    const material = await this.findOne(id);
-    const { title, description } = updateLearningMaterialDto;
-    const mainFile = files.file?.[0];
-    const imageFile = files.image?.[0];
-
-    // Update basic info
-    if (title) material.title = title;
-    if (description) material.description = description;
-
-    // Update main file if provided
-    if (mainFile) {
-      // Delete old file
-      if (material.fileKey) {
-        await this.deleteFromMinio(material.fileKey);
-      }
-
-      // Upload new file
-      const fileKey = `learning-material/${Date.now()}-${mainFile.originalname}`;
-      await this.uploadToMinio(fileKey, mainFile);
-
-      material.fileName = mainFile.originalname;
-      material.fileKey = fileKey; // Update file key
-      material.fileType = mainFile.mimetype.includes("pdf") ? "pdf" : "md";
-    }
-
-    // Update image if provided
-    if (imageFile) {
-      // Delete old image
-      if (material.imageKey) {
-        await this.deleteFromMinio(material.imageKey);
-      }
-
-      // Upload new image
-      const imageKey = `learning-material/images/${Date.now()}-${imageFile.originalname}`;
-      await this.uploadToMinio(imageKey, imageFile);
-
-      material.imageKey = imageKey; // Update image key
-    }
-
-    return this.learningMaterialRepository.save(material);
   }
 
   async remove(id: number) {
