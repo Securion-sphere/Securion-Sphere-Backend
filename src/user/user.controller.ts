@@ -42,6 +42,21 @@ export class UserController {
     return this.userService.findOne(req.user.id);
   }
 
+  @Get("count")
+  @ApiBearerAuth("access-token")
+  @UseGuards(JwtAuthGuard, SupervisorGuard)
+  async countUsers() {
+    const count = await this.userService.countUsers();
+    return { count };
+  }
+
+  @Get("profile/:id")
+  @ApiBearerAuth("access-token")
+  @UseGuards(JwtAuthGuard)
+  findOne(@Param("id") id: string) {
+    return this.userService.findOne(+id);
+  }
+
   @Patch("profile")
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
