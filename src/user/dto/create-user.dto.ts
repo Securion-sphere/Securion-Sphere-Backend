@@ -12,7 +12,7 @@ export class CreateUserDto {
 
   @ApiProperty()
   @IsString()
-  nichName: string;
+  nickName: string;
 
   @ApiProperty()
   @IsString()
