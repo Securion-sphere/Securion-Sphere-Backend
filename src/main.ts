@@ -8,10 +8,10 @@ import { ValidationPipe } from "@nestjs/common";
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
   const configService = app.get<ConfigService>(ConfigService);
-  const nodeEnv = configService.get<string>("NODE_ENV");
+  const nodeEnv = configService.get<string>("app.nodeEnv");
 
   app.enableCors({
-    origin: `${configService.get<string>("frontendUrl")}`,
+    origin: `${configService.get<string>("app.frontendUrl")}`,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -29,14 +29,14 @@ async function bootstrap() {
     const swaggerConfig = new DocumentBuilder()
       .setTitle("SecurionSphere API")
       .setDescription("SecurionSphere API")
-      .setVersion("1.0")
+      .setVersion("1.1")
       .addBearerAuth(
         {
           type: "http",
           scheme: "bearer",
           bearerFormat: "JWT",
           in: "header",
-          name: "Access-Token",
+          name: "Access Token",
           description: "Enter your Bearer access token",
         },
         "access-token",
@@ -47,16 +47,12 @@ async function bootstrap() {
           scheme: "bearer",
           bearerFormat: "JWT",
           in: "header",
-          name: "Refresh-Token",
+          name: "Refresh Token",
           description: "Enter your Bearer refresh token",
         },
         "refresh-token",
       )
       .addTag("SecurionSphere API")
-      .addSecurityRequirements({
-        "access-token": [],
-        "refresh-token": [],
-      })
       .build();
     const document = SwaggerModule.createDocument(app, swaggerConfig);
 
