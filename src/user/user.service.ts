@@ -199,6 +199,11 @@ export class UserService {
     return this.userRepo.save(user);
   }
 
+  async countUsers(): Promise<number> {
+    const count = await this.userRepo.count();
+    return count;
+  }
+
   async remove(id: number) {
     // Check if the user exists
     const user = await this.userRepo.findOneBy({ id });

@@ -59,11 +59,9 @@ describe("GoogleStrategy", () => {
         profile_img: "http://photo.url",
         nickName: null,
       };
-
       const accessToken = "testAccessToken";
       const refreshToken = "testRefreshToken";
 
-      // Mock the response of the AuthService
       mockAuthService.validateGoogleUser.mockResolvedValue(user);
 
       const done = jest.fn();
