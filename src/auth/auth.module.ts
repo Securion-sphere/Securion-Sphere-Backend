@@ -8,9 +8,8 @@ import { UserService } from "src/user/user.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { User } from "src/entities/user.entity";
 import { JwtModule } from "@nestjs/jwt";
-import jwtConfig from "src/config/jwt.config";
+import { jwtConfig, refreshJwtConfig } from "src/config";
 import { JwtStrategy } from "./utils/jwt.strategy";
-import refreshJwtCofig from "src/config/refresh-jwt.config";
 import { RefreshJwtStrategy } from "./utils/refresh.strategy";
 import { Student } from "src/entities/student.entity";
 import { Supervisor } from "src/entities/supervisor.entity";
@@ -19,7 +18,7 @@ import { Supervisor } from "src/entities/supervisor.entity";
   imports: [
     ConfigModule.forFeature(googleOauthConfig),
     ConfigModule.forFeature(jwtConfig),
-    ConfigModule.forFeature(refreshJwtCofig),
+    ConfigModule.forFeature(refreshJwtConfig),
     TypeOrmModule.forFeature([User, Student, Supervisor]),
     JwtModule.registerAsync(jwtConfig.asProvider()),
   ],
