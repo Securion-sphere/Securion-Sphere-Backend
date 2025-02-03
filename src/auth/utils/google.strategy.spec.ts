@@ -57,7 +57,7 @@ describe("GoogleStrategy", () => {
         firstName: "Test",
         lastName: "User",
         profile_img: "http://photo.url",
-        nichName: null,
+        nickName: null,
       };
 
       // Mock the response of the AuthService
@@ -72,7 +72,7 @@ describe("GoogleStrategy", () => {
         firstName: "Test",
         lastName: "User",
         profile_img: "http://photo.url",
-        nichName: null,
+        nickName: null,
       });
       expect(done).toHaveBeenCalledWith(null, user);
     });
