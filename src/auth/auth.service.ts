@@ -29,9 +29,9 @@ export class AuthService {
     const { accessToken, refreshToken } = await this.generateTokens(userId);
     const hashedRefreshToken = await argon2.hash(refreshToken);
     await this.userService.updateHashedRefreshToken(userId, hashedRefreshToken);
-    console.log(
-      `userId: ${userId}\naccessToken: ${accessToken}\nrefreshToken: ${refreshToken}`,
-    );
+    // console.log(
+    //   `userId: ${userId}\naccessToken: ${accessToken}\nrefreshToken: ${refreshToken}`,
+    // );
     return {
       id: userId,
       accessToken,
@@ -53,7 +53,7 @@ export class AuthService {
 
   async validateRefreshToken(userId: number, refreshToken: string) {
     const user = await this.userRepository.findOne({ where: { id: userId } });
-    console.log(user);
+    // console.log(user);
     if (!user || !user.hashedRefreshToken)
       throw new UnauthorizedException("Invalid Refresh Token");
 
@@ -61,7 +61,7 @@ export class AuthService {
       user.hashedRefreshToken,
       refreshToken,
     );
-    console.log("Refresh Token:", refreshTokenMatches);
+    // console.log("Refresh Token:", refreshTokenMatches);
     if (!refreshTokenMatches)
       throw new UnauthorizedException("Invalid Refresh Token");
 
