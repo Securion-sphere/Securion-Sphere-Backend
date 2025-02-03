@@ -7,6 +7,7 @@ import {
 } from "typeorm";
 import { User } from "./user.entity";
 import { Lab } from "./lab.entity";
+import { LabImage } from "./lab-image.entity";
 
 @Entity()
 export class Supervisor {
@@ -19,4 +20,7 @@ export class Supervisor {
 
   @OneToMany(() => Lab, (lab) => lab.creator)
   labs: Lab[];
+
+  @OneToMany(() => LabImage, (labImage) => labImage.owner)
+  imageLabs: LabImage[];
 }

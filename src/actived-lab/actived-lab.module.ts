@@ -6,7 +6,7 @@ import { ActivedLabService } from "./actived-lab.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ActivatedLab } from "src/entities/actived-lab.entity";
 import { ConfigModule } from "@nestjs/config";
-import dockerConfig from "src/config/docker.config";
+import dockerConfig from "src/config/docker-api.config";
 import { UserService } from "src/user/user.service";
 import { Student } from "src/entities/student.entity";
 import { Supervisor } from "src/entities/supervisor.entity";

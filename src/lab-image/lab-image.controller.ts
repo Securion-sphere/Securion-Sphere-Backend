@@ -50,9 +50,8 @@ export class LabImageController {
   update(
     @Param("id") id: string,
     @Body() updateLabImageDto: UpdateLabImageDto,
-    @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.labImageService.update(id, updateLabImageDto, file);
+    return this.labImageService.update(id, updateLabImageDto);
   }
 
   @Delete(":name")

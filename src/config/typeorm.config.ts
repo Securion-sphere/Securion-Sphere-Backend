@@ -11,7 +11,7 @@ export default registerAs("typeorm", () => ({
   database: process.env.DB_NAME,
   entities: ["dist/**/*.entity{.ts,.js}"],
   migrations: ["dist/migrations/*{.ts,.js}"],
-  synchronize: false,
+  synchronize: true,
 }));
 
 config({ path: [".env.local", ".env"] });

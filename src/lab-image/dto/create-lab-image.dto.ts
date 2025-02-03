@@ -3,7 +3,7 @@ import { ApiProperty } from "@nestjs/swagger";
 export class CreateLabImageDto {
   @ApiProperty({ type: String })
   @IsString()
-  name: string;
+  image_name: string;
 
   @ApiProperty({ type: "string", format: "binary" })
   file: Express.Multer.File;
