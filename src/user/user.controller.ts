@@ -38,15 +38,18 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
   @Get("profile")
-  getProfile(@Req() req) {
+  getProfile(@Req() req: { user: { id: number } }) {
     return this.userService.findOne(req.user.id);
   }
 
   @Patch("profile")
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
-  updateProfile(@Req() req, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+req.user.id, updateUserDto);
+  updateProfile(
+    @Req() req: { user: { id: number } },
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.userService.update(req.user.id, updateUserDto);
   }
 
   @Patch(":id")

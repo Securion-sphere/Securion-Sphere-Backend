@@ -2,7 +2,6 @@ import { Module } from "@nestjs/common";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { ConfigModule, ConfigService } from "@nestjs/config";
-import config from "./config/config";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { AuthModule } from "./auth/auth.module";
 import { UserModule } from "./user/user.module";
@@ -11,33 +10,32 @@ import { LabImageModule } from "./lab-image/lab-image.module";
 import { ActivedLabModule } from "./actived-lab/actived-lab.module";
 import { LearningMaterialModule } from "./learning-material/learning-material.module";
 import { StudentModule } from "./student/student.module";
-import dockerConfig from "./config/docker.config";
-import googleOauthConfig from "./config/google-oauth.config";
-import jwtConfig from "./config/jwt.config";
-import refreshJwtConfig from "./config/refresh-jwt.config";
-import minioConfig from "./config/minio.config";
-import typeorm from "./config/typeorm.config";
+import { HealthModule } from "./health/health.module";
+import { TerminusModule } from "@nestjs/terminus";
+import * as config from "./config";
+import * as Joi from "joi";
 
 @Module({
   imports: [
+    TerminusModule,
     ConfigModule.forRoot({
-      load: [
-        typeorm,
-        config,
-        dockerConfig,
-        googleOauthConfig,
-        jwtConfig,
-        refreshJwtConfig,
-        minioConfig,
-      ],
+      load: [...Object.values(config)],
       envFilePath: [".env.local", ".env"],
+      validationSchema: Joi.object({
+        NODE_ENV: Joi.string()
+          .valid("development", "production", "test", "provision")
+          .default("development"),
+      }),
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => {
-        console.log(configService.get("typeorm"));
-        return configService.get("typeorm");
+        return {
+          ...configService.get("typeorm"),
+          retryAttempts: 3,
+          retryDelay: 3000,
+        };
       },
     }),
     AuthModule,
@@ -47,6 +45,7 @@ import typeorm from "./config/typeorm.config";
     ActivedLabModule,
     LearningMaterialModule,
     StudentModule,
+    HealthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
