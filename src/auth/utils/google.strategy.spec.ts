@@ -60,12 +60,20 @@ describe("GoogleStrategy", () => {
         nickName: null,
       };
 
+      const accessToken = "testAccessToken";
+      const refreshToken = "testRefreshToken";
+
       // Mock the response of the AuthService
       mockAuthService.validateGoogleUser.mockResolvedValue(user);
 
       const done = jest.fn();
 
-      await googleStrategy.validate(profile, done as VerifyCallback);
+      await googleStrategy.validate(
+        accessToken,
+        refreshToken,
+        profile,
+        done as VerifyCallback,
+      );
 
       expect(mockAuthService.validateGoogleUser).toHaveBeenCalledWith({
         email: "testuser@example.com",

@@ -5,6 +5,7 @@ import {
   Post,
   Req,
   Res,
+  UseFilters,
   UseGuards,
 } from "@nestjs/common";
 import { GoogleAuthGuard } from "./guards/google-auth/google-auth.guard";
@@ -13,6 +14,7 @@ import { RefreshAuthGuard } from "./guards/refresh-auth/refresh-auth.guard";
 import { JwtAuthGuard } from "./guards/jwt-auth/jwt-auth.guard";
 import { ConfigService } from "@nestjs/config";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { ViewAuthFilter } from "./filters/google-callback.filter";
 
 @Controller("auth")
 @ApiTags("auth")
@@ -27,6 +29,7 @@ export class AuthController {
   async googleLogin() {}
 
   @UseGuards(GoogleAuthGuard)
+  @UseFilters(ViewAuthFilter)
   @Get("google/callback")
   async googleCallback(@Req() req, @Res() res) {
     // console.log(req);
