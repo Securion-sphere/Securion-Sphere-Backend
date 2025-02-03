@@ -14,6 +14,9 @@ export class LearningMaterial {
   @Column({ nullable: true })
   imageKey?: string;
 
+  @Column({ nullable: true })
+  category?: string;
+
   @Column()
   fileName: string;
 

@@ -22,7 +22,10 @@ export class ActivedLabController {
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
-  async active(@Req() req, @Body() createLabInstanceDto: CreateLabInstanceDto) {
+  async active(
+    @Req() req: { user: { id: number } },
+    @Body() createLabInstanceDto: CreateLabInstanceDto,
+  ) {
     return this.activedLabService.active({
       userId: req.user.id,
       ...createLabInstanceDto,
@@ -32,14 +35,17 @@ export class ActivedLabController {
   @Delete()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
-  async deactivate(@Req() req) {
+  async deactivate(@Req() req: { user: { id: number } }) {
     return this.activedLabService.deactivate(req.user.id);
   }
 
   @Post("submit-flag")
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
-  async submitFlag(@Req() req, @Body() submitFlagDto: SubmitFlagDto) {
+  async submitFlag(
+    @Req() req: { user: { id: number } },
+    @Body() submitFlagDto: SubmitFlagDto,
+  ) {
     return this.activedLabService.submitFlag({
       userId: req.user.id,
       ...submitFlagDto,
@@ -49,7 +55,9 @@ export class ActivedLabController {
   @Get("get-instance")
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
-  async getInstance(@Req() req): Promise<GetLabInstanceResponseDto> {
+  async getInstance(
+    @Req() req: { user: { id: number } },
+  ): Promise<GetLabInstanceResponseDto> {
     return this.activedLabService.getInstance(req.user.id);
   }
 }

@@ -7,7 +7,7 @@ import { Supervisor } from "src/entities/supervisor.entity";
 import { User } from "src/entities/user.entity";
 import { HttpModule } from "@nestjs/axios";
 import { ConfigModule } from "@nestjs/config";
-import dockerConfig from "src/config/docker.config";
+import dockerConfig from "src/config/docker-api.config";
 
 @Module({
   imports: [
