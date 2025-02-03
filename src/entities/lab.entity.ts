@@ -29,7 +29,7 @@ export class Lab {
   @ManyToOne(() => Supervisor, (supervisor) => supervisor.labs)
   creator: Supervisor;
 
-  @ManyToOne(() => LabImage, (labImage) => labImage.image_id)
+  @ManyToOne(() => LabImage, (labImage) => labImage.image_name)
   labImage: LabImage;
 
   @OneToMany(() => Solvation, (solvation) => solvation.lab)

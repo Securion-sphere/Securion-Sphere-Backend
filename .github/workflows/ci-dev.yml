@@ -20,6 +20,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'pnpm'
 
       # Disable due to issue to pnpm via corepack
       # - name: Enable pnpm corepack

@@ -1,4 +1,11 @@
-import { Injectable } from "@nestjs/common";
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  ServiceUnavailableException,
+} from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ActivatedLab } from "src/entities/actived-lab.entity";
 import { Repository } from "typeorm";
@@ -26,13 +33,14 @@ export class ActivedLabService {
     private solvationRepository: Repository<Solvation>,
   ) {}
 
+  private readonly dockerApiUrl = this.configService.get<string>("docker.api");
+
   async active(
     createLabInstanceDto: CreateLabInstanceDto & { userId: number },
   ): Promise<CreateLabInstanceReturnDto> {
     const port = randomInt(30000, 50001);
     const ip = this.configService.get<string>("docker.host");
     const flag = "flag{" + randomBytes(48).toString("hex") + "}";
-    const dockerApiUrl = this.configService.get<string>("docker.api");
     const owner = await this.userRepository.findOneBy({
       id: createLabInstanceDto.userId,
     });
@@ -59,14 +67,21 @@ export class ActivedLabService {
     }
     let res;
     try {
-      res = await axios.post(dockerApiUrl + "/container", {
-        image: lab.labImage.image_id,
-        container_port: (80).toString(),
+      res = await axios.post(this.dockerApiUrl + "/container", {
+        image: lab.labImage.image_name,
+        container_port: "80",
         host_port: port.toString(),
         flag: flag,
       });
     } catch (err) {
-      throw new Error("Cannot create container.");
+      if (err instanceof TypeError && err.message.includes("Invalid URL")) {
+        throw new ServiceUnavailableException(
+          `The container service is unavailable`,
+        );
+      }
+      throw new InternalServerErrorException(
+        `Cannot complete the request for this user`,
+      );
     }
     const newActivedLab = this.activeLabRepository.create({
       instanceOwner: owner,
@@ -112,7 +127,7 @@ export class ActivedLabService {
     });
 
     if (!instance) {
-      throw new Error("User haven't create instance yet");
+      throw new NotFoundException("User haven't create instance yet");
     }
 
     try {
@@ -120,7 +135,10 @@ export class ActivedLabService {
         data: { container_id: instance.containerId },
       });
     } catch (err) {
-      throw new Error("Cannot Stop Container");
+      throw new HttpException(
+        "Cannot complete the request for this user",
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
     await this.activeLabRepository.delete(instance.id);
@@ -136,7 +154,7 @@ export class ActivedLabService {
     });
 
     if (!owner) {
-      return { msg: "User not found" };
+      throw new NotFoundException("User not found");
     }
 
     const activatedLab = await this.activeLabRepository.findOne({
@@ -145,7 +163,7 @@ export class ActivedLabService {
     });
 
     if (!activatedLab) {
-      return { msg: "User is not create instance yet." };
+      throw new NotFoundException("User haven't create instance yet");
     }
 
     if (activatedLab.flag === flag) {
@@ -170,7 +188,7 @@ export class ActivedLabService {
     });
 
     if (!instance) {
-      throw new Error("User haven't create instance yet");
+      throw new NotFoundException("User haven't create instance yet");
     }
 
     const { id: instanceId, instanceOwner, instanceLab, ip, port } = instance;

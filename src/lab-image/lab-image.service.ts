@@ -51,7 +51,7 @@ export class LabImageService {
     );
 
     const newLabImage = this.labImageRepository.create({
-      image_id: data.Name,
+      image_name: data.Name,
       ...createLabImageDto,
     });
     return this.labImageRepository.save(newLabImage);
@@ -62,19 +62,15 @@ export class LabImageService {
   }
 
   async findByName(name: string) {
-    return this.labImageRepository.findOne({ where: { name } });
+    return this.labImageRepository.findOne({ where: { image_name: name } });
   }
 
-  async update(
-    id: string,
-    updateLabImageDto: UpdateLabImageDto,
-    file: Express.Multer.File,
-  ) {
-    const form = new FormData();
-    form.append("file", Buffer.from(file.buffer), {
-      filename: file.originalname,
-      contentType: file.mimetype,
-    });
+  async update(id: string, updateLabImageDto: UpdateLabImageDto) {
+    // const form = new FormData();
+    // form.append("file", Buffer.from(file.buffer), {
+    //   filename: file.originalname,
+    //   contentType: file.mimetype,
+    // });
 
     // const { data } = await lastValueFrom(
     //   this.httpService
@@ -86,12 +82,11 @@ export class LabImageService {
     //     ),
     // );
 
-    const lab = await this.findByName(id);
-    if (!lab) {
+    const labImage = await this.findByName(id);
+    if (!labImage) {
       throw new NotFoundException();
     } else {
-      await this.labImageRepository.update(lab.id, updateLabImageDto);
-      return this.labImageRepository.findOne({ where: { id: lab.id } });
+      return this.labImageRepository.update(labImage.id, updateLabImageDto);
     }
   }
 
