@@ -8,7 +8,7 @@ import { AuthService } from "../auth.service";
 export class GoogleStrategy extends PassportStrategy(Strategy) {
   constructor(
     @Inject(googleOauthConfig.KEY)
-    private googleConfiguration: ConfigType<typeof googleOauthConfig>,
+    googleConfiguration: ConfigType<typeof googleOauthConfig>,
     private authService: AuthService,
   ) {
     super({
@@ -19,12 +19,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  async validate(
-    accessToken: string,
-    refreshToken: string,
-    profile: any,
-    done: VerifyCallback,
-  ) {
+  async validate(profile: any, done: VerifyCallback) {
     console.log({ profile });
     const user = await this.authService.validateGoogleUser({
       email: profile.emails[0].value,

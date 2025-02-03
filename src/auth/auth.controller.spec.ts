@@ -20,9 +20,10 @@ describe("AuthController", () => {
               accessToken: "testAccessToken",
               refreshToken: "testRefreshToken",
             }),
-            refreshToken: jest
-              .fn()
-              .mockResolvedValue({ accessToken: "newAccessToken" }),
+            refreshToken: jest.fn().mockResolvedValue({
+              refreshToken: "newRefreshToken",
+              accessToken: "newAccessToken",
+            }),
             logout: jest.fn().mockResolvedValue({ message: "Logged out" }),
           },
         },
@@ -80,7 +81,10 @@ describe("AuthController", () => {
     const result = await authController.refreshToken(req);
 
     expect(authService.refreshToken).toHaveBeenCalledWith(1);
-    expect(result).toEqual({ accessToken: "newAccessToken" });
+    expect(result).toEqual({
+      refreshToken: "newRefreshToken",
+      accessToken: "newAccessToken",
+    });
   });
 
   it("should logout user", async () => {
