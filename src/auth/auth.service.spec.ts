@@ -136,7 +136,7 @@ describe("AuthService", () => {
       const result = await authService.validateGoogleUser({
         firstName: "test",
         lastName: "test",
-        nichName: null,
+        nickName: null,
         profile_img: null,
         email: "test@example.com",
       });
@@ -152,7 +152,7 @@ describe("AuthService", () => {
       const result = await authService.validateGoogleUser({
         firstName: "new",
         lastName: "new",
-        nichName: null,
+        nickName: null,
         profile_img: null,
         email: "new@example.com",
       });
