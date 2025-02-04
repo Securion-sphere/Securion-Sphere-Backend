@@ -21,15 +21,11 @@ jobs:
         with:
           node-version: 20
 
-      # Disable due to issue to pnpm via corepack
-      # - name: Enable pnpm corepack
-      #   run: corepack enable
+      - name: Prepare pnpm from package.json
+        run: corepack prepare --activate
 
-      # - name: Prepare pnpm
-      #   run: corepack prepare pnpm@latest --activate
-
-      - name: Install and prepare pnpm
-        run: npm i -g pnpm
+      - name: Enable Corepack
+        run: corepack enable
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
