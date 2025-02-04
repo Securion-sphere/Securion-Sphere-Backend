@@ -7,6 +7,7 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { Student } from "src/entities/student.entity";
 import { Supervisor } from "src/entities/supervisor.entity";
 import { Role } from "./types/role";
+import { AddEmailsDto } from "./dto/add-email.dto";
 
 @Injectable()
 export class UserService {
@@ -48,6 +49,52 @@ export class UserService {
     return role;
   }
 
+  async addEmails(addEmailsDto: AddEmailsDto): Promise<{
+    success: boolean;
+    results: Array<{ email: string; status: string }>;
+  }> {
+    const results = [];
+
+    for (const email of addEmailsDto.emails) {
+      try {
+        const existingUser = await this.userRepo.findOne({
+          where: { email },
+        });
+
+        if (existingUser) {
+          results.push({ email, status: "Email already exists" });
+          continue;
+        }
+
+        const user = await this.userRepo.save({
+          email,
+          firstName: null,
+          lastName: null,
+        });
+
+        if (addEmailsDto.role === "student") {
+          await this.studentRepo.save({
+            user: { id: user.id },
+          });
+        } else {
+          await this.supervisorRepo.save({
+            user: { id: user.id },
+          });
+        }
+
+        results.push({ email, status: "Added successfully" });
+      } catch (error) {
+        console.log(error);
+        results.push({ email, status: "Failed to add" });
+      }
+    }
+
+    return {
+      success: true,
+      results,
+    };
+  }
+
   async findByEmail(email: string) {
     return this.userRepo.findOne({
       where: {
@@ -85,37 +132,39 @@ export class UserService {
       ])
       .getMany();
 
-    return users.map((user) => {
-      if (user) {
-        if (!user.student) {
-          delete user.student;
+    return users
+      .filter((user) => user.firstName || user.lastName) // Only keep users with firstName or lastName
+      .map((user) => {
+        if (user) {
+          if (!user.student) {
+            delete user.student;
+          }
+          if (!user.supervisor) {
+            delete user.supervisor;
+          }
         }
-        if (!user.supervisor) {
-          delete user.supervisor;
+
+        let totalScore = 0;
+        if (user.student) {
+          totalScore = user.student.solved_lab.reduce((score, solvation) => {
+            return score + solvation.lab.point;
+          }, 0);
         }
-      }
 
-      let totalScore = 0;
-      if (user.student) {
-        totalScore = user.student.solved_lab.reduce((score, solvation) => {
-          return score + solvation.lab.point;
-        }, 0);
-      }
-
-      return {
-        ...user,
-        ...(user.supervisor ? { supervisor: user.supervisor } : {}),
-        ...(user.student
-          ? {
-              student: {
-                year: user.student.year,
-                score: totalScore,
-                solved_lab: user.student.solved_lab,
-              },
-            }
-          : {}),
-      };
-    });
+        return {
+          ...user,
+          ...(user.supervisor ? { supervisor: user.supervisor } : {}),
+          ...(user.student
+            ? {
+                student: {
+                  year: user.student.year,
+                  score: totalScore,
+                  solved_lab: user.student.solved_lab,
+                },
+              }
+            : {}),
+        };
+      });
   }
 
   async findOne(id: number) {

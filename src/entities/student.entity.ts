@@ -21,6 +21,6 @@ export class Student {
   @OneToMany(() => Solvation, (solvation) => solvation.student)
   solved_lab: Solvation[];
 
-  @Column()
+  @Column({ nullable: true })
   year: number;
 }

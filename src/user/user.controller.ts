@@ -15,6 +15,7 @@ import { UpdateUserDto } from "./dto/update-user.dto";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth/jwt-auth.guard";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { SupervisorGuard } from "./guards/role.guard";
+import { AddEmailsDto } from "./dto/add-email.dto";
 
 @Controller("user")
 @ApiTags("user")
@@ -26,6 +27,13 @@ export class UserController {
   @UseGuards(JwtAuthGuard, SupervisorGuard)
   create(@Body() createUserDto: CreateUserDto) {
     return this.userService.create(createUserDto);
+  }
+
+  @Post("email-add")
+  @ApiBearerAuth("access-token")
+  @UseGuards(JwtAuthGuard, SupervisorGuard)
+  async addEmails(@Body() addEmailsDto: AddEmailsDto) {
+    return this.userService.addEmails(addEmailsDto);
   }
 
   @Get()
