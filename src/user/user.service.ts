@@ -7,6 +7,11 @@ import { Injectable, NotFoundException } from "@nestjs/common";
 import { Student } from "src/entities/student.entity";
 import { Supervisor } from "src/entities/supervisor.entity";
 import { Role } from "./types/role";
+import { AddEmailsDto } from "./dto/add-email.dto";
+import { PreLoginUser } from "src/entities/pre-login-user.entity";
+import { Parser } from "csv-parse";
+import { Readable } from "stream";
+import { PreLoginUserDto } from "./dto/pre-login-user.dto";
 
 @Injectable()
 export class UserService {
@@ -17,6 +22,8 @@ export class UserService {
     private readonly studentRepo: Repository<Student>,
     @InjectRepository(Supervisor)
     private readonly supervisorRepo: Repository<Supervisor>,
+    @InjectRepository(PreLoginUser)
+    private readonly preLoginUserRepo: Repository<PreLoginUser>,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -45,6 +52,190 @@ export class UserService {
       role = { role: "Supervisor", user };
     }
     return role;
+  }
+
+  async addEmails(addEmailsDto: AddEmailsDto): Promise<{
+    success: boolean;
+    results: Array<{ email: string; status: string }>;
+  }> {
+    const results: Array<{ email: string; status: string }> = [];
+    const { emails, role = "student" } = addEmailsDto;
+
+    for (const email of emails) {
+      try {
+        const existingPreLoginUser = await this.preLoginUserRepo.findOne({
+          where: { email },
+        });
+
+        const existingUser = await this.userRepo.findOne({
+          where: { email },
+        });
+
+        if (existingPreLoginUser) {
+          results.push({
+            email,
+            status: "Failed: Email already exists in pre-login users",
+          });
+        } else if (existingUser) {
+          results.push({
+            email,
+            status: "Failed: Email already exists in registered users",
+          });
+        } else {
+          const preLoginUser = this.preLoginUserRepo.create({
+            email,
+            role,
+          });
+
+          await this.preLoginUserRepo.save(preLoginUser);
+
+          results.push({
+            email,
+            status: "Success: Email added to pre-login users",
+          });
+        }
+      } catch (error) {
+        results.push({
+          email,
+          status: `Failed: ${error.message}`,
+        });
+      }
+    }
+
+    return {
+      success: results.some((result) => result.status.startsWith("Success")),
+      results,
+    };
+  }
+
+  async bulkAddUsersFromCsv(
+    file: Express.Multer.File,
+    role: "student" | "supervisor" = "student",
+  ): Promise<{
+    success: boolean;
+    results: Array<{ email: string; status: string }>;
+    summary: {
+      total: number;
+      successful: number;
+      failed: number;
+    };
+  }> {
+    const results: Array<{ email: string; status: string }> = [];
+    let successful = 0;
+    let failed = 0;
+
+    try {
+      const emails = await this.parseCSV(file);
+      const studentRegex = /^[a-zA-Z0-9._%+-]+@kmitl\.ac\.th$/;
+      const supervisorRegex =
+        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+      for (const email of emails) {
+        try {
+          if (!email.trim()) {
+            continue;
+          }
+
+          // Validate email format based on role
+          const isValidFormat =
+            role === "student"
+              ? studentRegex.test(email)
+              : supervisorRegex.test(email);
+
+          if (!isValidFormat) {
+            results.push({
+              email,
+              status: `Failed: Invalid email format for ${role} role`,
+            });
+            failed++;
+            continue;
+          }
+
+          const existingPreLoginUser = await this.preLoginUserRepo.findOne({
+            where: { email },
+          });
+
+          const existingUser = await this.userRepo.findOne({
+            where: { email },
+          });
+
+          if (existingPreLoginUser) {
+            results.push({
+              email,
+              status: "Failed: Email already exists in pre-login users",
+            });
+            failed++;
+          } else if (existingUser) {
+            results.push({
+              email,
+              status: "Failed: Email already exists in registered users",
+            });
+            failed++;
+          } else {
+            const preLoginUser = this.preLoginUserRepo.create({
+              email,
+              role,
+            });
+
+            await this.preLoginUserRepo.save(preLoginUser);
+
+            results.push({
+              email,
+              status: "Success: Email added to pre-login users",
+            });
+            successful++;
+          }
+        } catch (error) {
+          results.push({
+            email,
+            status: `Failed: ${error.message}`,
+          });
+          failed++;
+        }
+      }
+
+      return {
+        success: successful > 0,
+        results,
+        summary: {
+          total: successful + failed,
+          successful,
+          failed,
+        },
+      };
+    } catch (error) {
+      throw new Error(`Failed to process CSV file: ${error.message}`);
+    }
+  }
+
+  private async parseCSV(file: Express.Multer.File): Promise<string[]> {
+    return new Promise((resolve, reject) => {
+      const emails: string[] = [];
+      const parser = new Parser({
+        delimiter: ",",
+        skip_empty_lines: true,
+      });
+
+      parser.on("readable", function () {
+        let record;
+        while ((record = parser.read()) !== null) {
+          if (record[0]) {
+            emails.push(record[0].trim());
+          }
+        }
+      });
+
+      parser.on("error", function (err) {
+        reject(err);
+      });
+
+      parser.on("end", function () {
+        resolve(emails);
+      });
+
+      const stream = Readable.from(file.buffer);
+      stream.pipe(parser);
+    });
   }
 
   async findByEmail(email: string) {
@@ -114,6 +305,29 @@ export class UserService {
           : {}),
       };
     });
+  }
+
+  async findAllPreLoginUser(): Promise<PreLoginUserDto[]> {
+    const users = await this.preLoginUserRepo.find();
+    return users;
+  }
+
+  async removePreLoginUser(
+    email: string,
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      const user = await this.preLoginUserRepo.findOne({ where: { email } });
+      if (!user) {
+        return { success: false, message: "User not found" };
+      }
+      await this.preLoginUserRepo.remove(user);
+      return { success: true, message: "User deleted successfully" };
+    } catch (error) {
+      return {
+        success: false,
+        message: error.message || "An error occurred while deleting the user",
+      };
+    }
   }
 
   async findOne(id: number) {
