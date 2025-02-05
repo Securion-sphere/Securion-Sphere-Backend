@@ -11,6 +11,7 @@ import { UserService } from "src/user/user.service";
 import { Student } from "src/entities/student.entity";
 import { Supervisor } from "src/entities/supervisor.entity";
 import { Solvation } from "src/entities/solvation.entity";
+import { PreLoginUser } from "src/entities/pre-login-user.entity";
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { Solvation } from "src/entities/solvation.entity";
       Student,
       Supervisor,
       Solvation,
+      PreLoginUser,
     ]),
     ConfigModule.forFeature(dockerConfig),
   ],

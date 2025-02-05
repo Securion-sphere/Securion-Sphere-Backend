@@ -8,6 +8,7 @@ import { Student } from "src/entities/student.entity";
 import { Supervisor } from "src/entities/supervisor.entity";
 import { Role } from "./types/role";
 import { AddEmailsDto } from "./dto/add-email.dto";
+import { PreLoginUser } from "src/entities/pre-login-user.entity";
 
 @Injectable()
 export class UserService {
@@ -18,6 +19,8 @@ export class UserService {
     private readonly studentRepo: Repository<Student>,
     @InjectRepository(Supervisor)
     private readonly supervisorRepo: Repository<Supervisor>,
+    @InjectRepository(PreLoginUser)
+    private readonly preLoginUserRepo: Repository<PreLoginUser>,
   ) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -53,44 +56,55 @@ export class UserService {
     success: boolean;
     results: Array<{ email: string; status: string }>;
   }> {
-    const results = [];
+    const results: Array<{ email: string; status: string }> = [];
+    const { emails, role = "student" } = addEmailsDto;
 
-    for (const email of addEmailsDto.emails) {
+    for (const email of emails) {
       try {
+        // Check if email already exists in pre-login-user table
+        const existingPreLoginUser = await this.preLoginUserRepo.findOne({
+          where: { email },
+        });
+
+        // Check if email already exists in user table
         const existingUser = await this.userRepo.findOne({
           where: { email },
         });
 
-        if (existingUser) {
-          results.push({ email, status: "Email already exists" });
-          continue;
-        }
-
-        const user = await this.userRepo.save({
-          email,
-          firstName: null,
-          lastName: null,
-        });
-
-        if (addEmailsDto.role === "student") {
-          await this.studentRepo.save({
-            user: { id: user.id },
+        if (existingPreLoginUser) {
+          results.push({
+            email,
+            status: "Failed: Email already exists in pre-login users",
+          });
+        } else if (existingUser) {
+          results.push({
+            email,
+            status: "Failed: Email already exists in registered users",
           });
         } else {
-          await this.supervisorRepo.save({
-            user: { id: user.id },
+          // Create new pre-login user
+          const preLoginUser = this.preLoginUserRepo.create({
+            email,
+            role,
+          });
+
+          await this.preLoginUserRepo.save(preLoginUser);
+
+          results.push({
+            email,
+            status: "Success: Email added to pre-login users",
           });
         }
-
-        results.push({ email, status: "Added successfully" });
       } catch (error) {
-        console.log(error);
-        results.push({ email, status: "Failed to add" });
+        results.push({
+          email,
+          status: `Failed: ${error.message}`,
+        });
       }
     }
 
     return {
-      success: true,
+      success: results.some((result) => result.status.startsWith("Success")),
       results,
     };
   }
@@ -132,39 +146,36 @@ export class UserService {
       ])
       .getMany();
 
-    return users
-      .filter((user) => user.firstName || user.lastName) // Only keep users with firstName or lastName
-      .map((user) => {
-        if (user) {
-          if (!user.student) {
-            delete user.student;
-          }
-          if (!user.supervisor) {
-            delete user.supervisor;
-          }
+    return users.map((user) => {
+      if (user) {
+        if (!user.student) {
+          delete user.student;
         }
-
-        let totalScore = 0;
-        if (user.student) {
-          totalScore = user.student.solved_lab.reduce((score, solvation) => {
-            return score + solvation.lab.point;
-          }, 0);
+        if (!user.supervisor) {
+          delete user.supervisor;
         }
+      }
 
-        return {
-          ...user,
-          ...(user.supervisor ? { supervisor: user.supervisor } : {}),
-          ...(user.student
-            ? {
-                student: {
-                  year: user.student.year,
-                  score: totalScore,
-                  solved_lab: user.student.solved_lab,
-                },
-              }
-            : {}),
-        };
-      });
+      let totalScore = 0;
+      if (user.student) {
+        totalScore = user.student.solved_lab.reduce((score, solvation) => {
+          return score + solvation.lab.point;
+        }, 0);
+      }
+
+      return {
+        ...user,
+        ...(user.supervisor ? { supervisor: user.supervisor } : {}),
+        ...(user.student
+          ? {
+              student: {
+                score: totalScore,
+                solved_lab: user.student.solved_lab,
+              },
+            }
+          : {}),
+      };
+    });
   }
 
   async findOne(id: number) {
