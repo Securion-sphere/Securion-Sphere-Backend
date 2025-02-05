@@ -39,7 +39,6 @@ export class UserService {
       const { user } = await this.studentRepo.save(
         this.studentRepo.create({
           user: resUser,
-          year: 0,
           solved_lab: [],
         }),
       );
@@ -381,7 +380,6 @@ export class UserService {
       ...user,
       ...(user.student && {
         student: {
-          year: user.student.year,
           score: totalScore,
           solved_lab: user.student.solved_lab,
         },
