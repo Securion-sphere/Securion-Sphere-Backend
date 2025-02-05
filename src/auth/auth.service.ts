@@ -29,9 +29,7 @@ export class AuthService {
     const { accessToken, refreshToken } = await this.generateTokens(userId);
     const hashedRefreshToken = await argon2.hash(refreshToken);
     await this.userService.updateHashedRefreshToken(userId, hashedRefreshToken);
-    // console.log(
-    //   `userId: ${userId}\naccessToken: ${accessToken}\nrefreshToken: ${refreshToken}`,
-    // );
+
     return {
       id: userId,
       accessToken,
@@ -53,7 +51,6 @@ export class AuthService {
 
   async validateRefreshToken(userId: number, refreshToken: string) {
     const user = await this.userRepository.findOne({ where: { id: userId } });
-    // console.log(user);
     if (!user || !user.hashedRefreshToken)
       throw new UnauthorizedException("Invalid Refresh Token");
 
@@ -61,7 +58,6 @@ export class AuthService {
       user.hashedRefreshToken,
       refreshToken,
     );
-    // console.log("Refresh Token:", refreshTokenMatches);
     if (!refreshTokenMatches)
       throw new UnauthorizedException("Invalid Refresh Token");
 
@@ -69,6 +65,15 @@ export class AuthService {
   }
 
   async validateGoogleUser(googleUser: CreateUserDto) {
+    const preLoginUser = await this.userService.findPreLoginUserByEmail(
+      googleUser.email,
+    );
+    if (!preLoginUser) {
+      throw new UnauthorizedException(
+        "Your email is not authorized. Please contact your supervisor.",
+      );
+    }
+
     const user = await this.userService.findByEmail(googleUser.email);
     if (user) return user;
     return this.userService.create(googleUser);
@@ -78,7 +83,6 @@ export class AuthService {
     const { accessToken, refreshToken } = await this.generateTokens(userId);
     const hashedRefreshToken = await argon2.hash(refreshToken);
 
-    // Update only after successful validation
     await this.userService.updateHashedRefreshToken(userId, hashedRefreshToken);
 
     return { id: userId, accessToken, refreshToken };
