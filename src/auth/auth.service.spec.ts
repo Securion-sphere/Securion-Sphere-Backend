@@ -26,6 +26,9 @@ describe("AuthService", () => {
             findByEmail: jest.fn(),
             create: jest.fn(),
             updateHashedRefreshToken: jest.fn(),
+            findPreLoginUserByEmail: jest
+              .fn()
+              .mockResolvedValue({ email: "test@email.com", role: "student" }),
           },
         },
         {
