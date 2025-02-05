@@ -32,10 +32,7 @@ export class AuthController {
   @UseFilters(ViewAuthFilter)
   @Get("google/callback")
   async googleCallback(@Req() req, @Res() res) {
-    // console.log(req);
     const response = await this.authService.login(req.user.id);
-
-    // Redirect to the frontend with tokens in the query params
     const frontendUrl = this.configService.get<string>("app.frontendUrl");
     res.redirect(
       `${frontendUrl}/?accessToken=${response.accessToken}&refreshToken=${response.refreshToken}`,

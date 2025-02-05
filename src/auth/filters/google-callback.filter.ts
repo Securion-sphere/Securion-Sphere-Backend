@@ -17,6 +17,10 @@ export class ViewAuthFilter implements ExceptionFilter {
     const response = ctx.getResponse<Response>();
     const status = exception.getStatus();
 
-    response.status(status).redirect(`${frontendUrl}/?error`);
+    response
+      .status(status)
+      .redirect(
+        `${frontendUrl}/auth/login?error=${encodeURIComponent(exception.message)}`,
+      );
   }
 }

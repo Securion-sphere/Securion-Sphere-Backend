@@ -308,6 +308,12 @@ export class UserService {
     });
   }
 
+  async findPreLoginUserByEmail(
+    email: string,
+  ): Promise<PreLoginUserDto | null> {
+    return this.preLoginUserRepo.findOne({ where: { email } });
+  }
+
   async findAllPreLoginUser(): Promise<PreLoginUserDto[]> {
     const users = await this.preLoginUserRepo.find();
     return users;
