@@ -38,7 +38,6 @@ export class StudentService {
           labId: true,
           dateSolved: true,
         },
-        year: true,
       },
     });
   }
@@ -65,7 +64,6 @@ export class StudentService {
             labId: true,
             dateSolved: true,
           },
-          year: true,
         },
       })) ??
       (() => {

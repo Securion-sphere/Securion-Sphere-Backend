@@ -1,5 +1,4 @@
 import {
-  Column,
   Entity,
   JoinColumn,
   OneToMany,
@@ -20,7 +19,4 @@ export class Student {
 
   @OneToMany(() => Solvation, (solvation) => solvation.student)
   solved_lab: Solvation[];
-
-  @Column({ nullable: true })
-  year: number;
 }
