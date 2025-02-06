@@ -3,7 +3,6 @@ import {
   Get,
   Post,
   Body,
-  Patch,
   Param,
   Delete,
   UseGuards,
@@ -12,7 +11,6 @@ import {
 } from "@nestjs/common";
 import { LabImageService } from "./lab-image.service";
 import { CreateLabImageDto } from "./dto/create-lab-image.dto";
-import { UpdateLabImageDto } from "./dto/update-lab-image.dto";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth/jwt-auth.guard";
 import { ApiBearerAuth, ApiConsumes, ApiTags } from "@nestjs/swagger";
 import { SupervisorGuard } from "src/user/guards/role.guard";
@@ -35,29 +33,24 @@ export class LabImageController {
     return this.labImageService.create(createLabDto, file);
   }
 
+  @Get(":id")
+  @ApiBearerAuth("access-token")
+  @UseGuards(JwtAuthGuard, SupervisorGuard)
+  findOne(@Param("id") id: string) {
+    return this.labImageService.findOne(id);
+  }
+
   @Get()
   @ApiBearerAuth("access-token")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, SupervisorGuard)
   findAll() {
     return this.labImageService.findAll();
   }
 
-  @Patch(":name")
+  @Delete(":id")
   @UseGuards(JwtAuthGuard, SupervisorGuard)
   @ApiBearerAuth("access-token")
-  @ApiConsumes("multipart/form-data")
-  @UseInterceptors(FileInterceptor("file"))
-  update(
-    @Param("id") id: string,
-    @Body() updateLabImageDto: UpdateLabImageDto,
-  ) {
-    return this.labImageService.update(id, updateLabImageDto);
-  }
-
-  @Delete(":name")
-  @UseGuards(JwtAuthGuard, SupervisorGuard)
-  @ApiBearerAuth("access-token")
-  remove(@Param("name") name: string) {
-    return this.labImageService.remove(name);
+  remove(@Param("id") id: string) {
+    return this.labImageService.remove(id);
   }
 }
