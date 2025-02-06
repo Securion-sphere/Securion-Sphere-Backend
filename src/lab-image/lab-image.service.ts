@@ -1,13 +1,14 @@
 import {
   BadRequestException,
+  HttpException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from "@nestjs/common";
 import { Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { LabImage } from "src/entities/lab-image.entity";
 import { CreateLabImageDto } from "./dto/create-lab-image.dto";
-import { UpdateLabImageDto } from "./dto/update-lab-image.dto";
 import { HttpService } from "@nestjs/axios";
 import { ConfigService } from "@nestjs/config";
 import * as FormData from "form-data";
@@ -51,9 +52,10 @@ export class LabImageService {
     );
 
     const newLabImage = this.labImageRepository.create({
-      image_name: data.Name,
-      ...createLabImageDto,
+      image_name: createLabImageDto.image_name,
+      image_id: data.ID,
     });
+
     return this.labImageRepository.save(newLabImage);
   }
 
@@ -61,40 +63,50 @@ export class LabImageService {
     return this.labImageRepository.find();
   }
 
-  async findByName(name: string) {
-    return this.labImageRepository.findOne({ where: { image_name: name } });
-  }
+  async findOne(id: string) {
+    try {
+      await lastValueFrom(
+        this.httpService.get(`${this.dockerApiUrl}/image/${id}`).pipe(
+          catchError((error: AxiosError) => {
+            const status = error.response?.status || 500;
+            const message = error.response?.data || "Internal server error";
 
-  async update(id: string, updateLabImageDto: UpdateLabImageDto) {
-    // const form = new FormData();
-    // form.append("file", Buffer.from(file.buffer), {
-    //   filename: file.originalname,
-    //   contentType: file.mimetype,
-    // });
-
-    // const { data } = await lastValueFrom(
-    //   this.httpService
-    //     .<ImageUploadRes>(this.dockerApiUrl + "/image", form)
-    //     .pipe(
-    //       catchError((error: AxiosError) => {
-    //         throw error;
-    //       }),
-    //     ),
-    // );
-
-    const labImage = await this.findByName(id);
-    if (!labImage) {
-      throw new NotFoundException();
-    } else {
-      return this.labImageRepository.update(labImage.id, updateLabImageDto);
+            throw new HttpException({ error: message }, status);
+          }),
+        ),
+      );
+    } catch (err) {
+      throw new InternalServerErrorException(err);
     }
+
+    const image = await this.labImageRepository.findOne({
+      where: { image_id: id },
+    });
+    if (!image) {
+      throw new NotFoundException({ msg: "Image not found" });
+    }
+
+    return image;
   }
 
-  async remove(name: string) {
-    const lab = await this.findByName(name);
+  async remove(id: string) {
+    const lab = await this.findOne(id);
     if (!lab) {
       throw new NotFoundException();
     }
+
+    try {
+      await lastValueFrom(
+        this.httpService.delete(`${this.dockerApiUrl}/image/${id}`).pipe(
+          catchError((error: AxiosError) => {
+            return throwError(() => error);
+          }),
+        ),
+      );
+    } catch (err) {
+      throw new InternalServerErrorException(err);
+    }
+
     return this.labImageRepository.remove(lab);
   }
 }

@@ -1,12 +1,5 @@
-import {
-  Column,
-  Entity,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from "typeorm";
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
 import { Lab } from "./lab.entity";
-import { Supervisor } from "./supervisor.entity";
 
 @Entity()
 export class LabImage {
@@ -16,9 +9,9 @@ export class LabImage {
   @Column({ type: "text", unique: true })
   image_name: string;
 
+  @Column({ type: "text", unique: true })
+  image_id: string;
+
   @OneToMany(() => Lab, (lab) => lab["image-id"])
   lab_used: Lab[];
-
-  @ManyToOne(() => Supervisor, (supervisor) => supervisor.imageLabs)
-  owner: Supervisor;
 }
