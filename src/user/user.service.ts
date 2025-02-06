@@ -29,28 +29,29 @@ export class UserService {
   async create(createUserDto: CreateUserDto) {
     const user = this.userRepo.create(createUserDto);
     const resUser = await this.userRepo.save(user);
-
-    const studenRegex = /^\d{8}@kmitl\.ac\.th$/;
-    const supervisorRegex = /^[a-zA-Z]+(\.[a-zA-Z]+)?@kmitl\.ac\.th$/;
+    const preLoginUser = await this.preLoginUserRepo.findOne({
+      where: { email: user.email },
+    });
 
     let role: Role = null;
 
-    if (studenRegex.test(resUser.email)) {
-      const { user } = await this.studentRepo.save(
+    if (preLoginUser?.role === "student") {
+      await this.studentRepo.save(
         this.studentRepo.create({
           user: resUser,
           solved_lab: [],
         }),
       );
-      role = { role: "Student", user };
-    } else if (supervisorRegex.test(resUser.email)) {
-      const { user } = await this.supervisorRepo.save(
+      role = { role: "Student", user: resUser };
+    } else if (preLoginUser?.role === "supervisor") {
+      await this.supervisorRepo.save(
         this.supervisorRepo.create({
           user: resUser,
         }),
       );
-      role = { role: "Supervisor", user };
+      role = { role: "Supervisor", user: resUser };
     }
+
     return role;
   }
 
@@ -375,21 +376,23 @@ export class UserService {
       }
     }
 
-    let totalScore = 0;
-    if (user && user.student) {
-      totalScore = user.student.solved_lab.reduce((score, solvation) => {
-        return score + solvation.lab.point; // Add up the points for each solved lab
-      }, 0);
-    }
+    const totalScore =
+      user.student?.solved_lab?.reduce(
+        (score, solvation) => score + (solvation.lab?.point || 0),
+        0,
+      ) || 0;
 
     return {
       ...user,
-      ...(user.student && {
-        student: {
-          score: totalScore,
-          solved_lab: user.student.solved_lab,
-        },
-      }),
+      ...(user.supervisor ? { supervisor: user.supervisor } : {}),
+      ...(user.student
+        ? {
+            student: {
+              score: totalScore,
+              solved_lab: user.student.solved_lab,
+            },
+          }
+        : {}),
     };
   }
 

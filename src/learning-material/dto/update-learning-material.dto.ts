@@ -12,6 +12,11 @@ export class UpdateLearningMaterialDto {
   @IsOptional()
   description?: string;
 
+  @ApiPropertyOptional({ description: "Category of the learning material" })
+  @IsString()
+  @IsOptional()
+  category?: string;
+
   @ApiPropertyOptional({ type: "string", format: "binary" })
   @IsOptional()
   image?: Express.Multer.File;
