@@ -194,10 +194,12 @@ export class UserService {
 
     for (const email of emails) {
       try {
+        // Check if email already exists in pre-login-user table
         const existingPreLoginUser = await this.preLoginUserRepo.findOne({
           where: { email },
         });
 
+        // Check if email already exists in user table
         const existingUser = await this.userRepo.findOne({
           where: { email },
         });
@@ -276,36 +278,34 @@ export class UserService {
       ])
       .getMany();
 
-    return users
-      .filter((user) => user.firstName || user.lastName) // Only keep users with firstName or lastName
-      .map((user) => {
-        if (user) {
-          if (!user.student) {
-            delete user.student;
-          }
-          if (!user.supervisor) {
-            delete user.supervisor;
-          }
+    return users.map((user) => {
+      if (user) {
+        if (!user.student) {
+          delete user.student;
         }
+        if (!user.supervisor) {
+          delete user.supervisor;
+        }
+      }
 
-        const totalScore =
-          user.student?.solved_lab?.reduce((score, solvation) => {
-            return score + (solvation.lab?.point || 0);
-          }, 0) || 0;
+      const totalScore =
+        user.student?.solved_lab?.reduce((score, solvation) => {
+          return score + (solvation.lab?.point || 0);
+        }, 0) || 0;
 
-        return {
-          ...user,
-          supervisor: user.supervisor,
-          ...(user.student
-            ? {
-                student: {
-                  score: totalScore,
-                  solved_lab: user.student.solved_lab,
-                },
-              }
-            : {}),
-        };
-      });
+      return {
+        ...user,
+        supervisor: user.supervisor,
+        ...(user.student
+          ? {
+              student: {
+                score: totalScore,
+                solved_lab: user.student.solved_lab,
+              },
+            }
+          : {}),
+      };
+    });
   }
 
   async findPreLoginUserByEmail(
