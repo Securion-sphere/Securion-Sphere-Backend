@@ -37,8 +37,6 @@ services:
       - FRONTEND_URL
       - NODE_ENV
       - TZ
-    env_file:
-      - .env.local
     healthcheck:
       test:
         [
