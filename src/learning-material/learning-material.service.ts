@@ -33,7 +33,7 @@ export class LearningMaterialService {
       file?: Express.Multer.File[];
     },
   ) {
-    const { title, description } = createLearningMaterialDto;
+    const { title, description, category } = createLearningMaterialDto;
     const mainFile = files.file?.[0];
     const imageFile = files.image?.[0];
 
@@ -41,7 +41,6 @@ export class LearningMaterialService {
       throw new Error("Main file is required");
     }
 
-    // Determine file type and set appropriate base path
     const isMarkdown =
       mainFile.mimetype.includes("markdown") ||
       mainFile.originalname.toLowerCase().endsWith(".md");
@@ -49,11 +48,9 @@ export class LearningMaterialService {
       ? `learning-material/md/${Date.now()}-${path.parse(mainFile.originalname).name}/`
       : `learning-material/pdf/${Date.now()}-${path.parse(mainFile.originalname).name}/`;
 
-    // Upload main file
     const fileKey = `${basePath}${mainFile.originalname}`;
     await this.uploadToMinio(fileKey, mainFile);
 
-    // Upload image if provided
     let imageKey = null;
     if (imageFile) {
       imageKey = `${basePath}background-image${path.extname(imageFile.originalname)}`;
@@ -64,9 +61,10 @@ export class LearningMaterialService {
       title,
       description,
       fileName: mainFile.originalname,
-      fileKey, // Store only the file key
+      category,
+      fileKey,
       fileType: isMarkdown ? "md" : "pdf",
-      imageKey, // Store only the image key
+      imageKey,
     });
 
     return this.learningMaterialRepository.save(learningMaterial);
@@ -81,22 +79,19 @@ export class LearningMaterialService {
     },
   ) {
     const material = await this.findOne(id);
-    const { title, description } = updateLearningMaterialDto;
+    const { title, description, category } = updateLearningMaterialDto;
     const mainFile = files.file?.[0];
     const imageFile = files.image?.[0];
 
-    // Update basic info
     if (title) material.title = title;
     if (description) material.description = description;
+    if (category) material.category = category;
 
-    // Update main file if provided
     if (mainFile) {
-      // Delete old file
       if (material.fileKey) {
         await this.deleteFromMinio(material.fileKey);
       }
 
-      // Determine file type and set appropriate base path
       const isMarkdown =
         mainFile.mimetype.includes("markdown") ||
         mainFile.originalname.toLowerCase().endsWith(".md");
@@ -104,7 +99,6 @@ export class LearningMaterialService {
         ? `learning-material/md/${Date.now()}-${path.parse(mainFile.originalname).name}/`
         : `learning-material/pdf/${Date.now()}-${path.parse(mainFile.originalname).name}/`;
 
-      // Upload new file
       const fileKey = `${basePath}${mainFile.originalname}`;
       await this.uploadToMinio(fileKey, mainFile);
 
@@ -113,23 +107,19 @@ export class LearningMaterialService {
       material.fileType = isMarkdown ? "md" : "pdf";
     }
 
-    // Update image if provided
     if (imageFile) {
-      // Delete old image
       if (material.imageKey) {
         await this.deleteFromMinio(material.imageKey);
       }
 
-      // Extract basePath from the existing fileKey
       const basePath = material.fileKey
         ? material.fileKey.substring(0, material.fileKey.lastIndexOf("/") + 1)
         : `learning-material/${material.fileType}/${Date.now()}-${path.parse(material.fileName).name}/`;
 
-      // Upload new image using the same basePath
       const imageKey = `${basePath}background-image${path.extname(imageFile.originalname)}`;
       await this.uploadToMinio(imageKey, imageFile);
 
-      material.imageKey = imageKey; // Update image key
+      material.imageKey = imageKey;
     }
 
     return this.learningMaterialRepository.save(material);
