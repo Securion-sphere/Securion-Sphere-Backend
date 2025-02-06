@@ -144,16 +144,10 @@ export class UserService {
       ])
       .getMany();
 
-    return users
-      .filter((user) => user.firstName || user.lastName) // Only keep users with firstName or lastName
-      .map((user) => {
-        if (user) {
-          if (!user.student) {
-            delete user.student;
-          }
-          if (!user.supervisor) {
-            delete user.supervisor;
-          }
+    return users.map((user) => {
+      if (user) {
+        if (!user.student) {
+          delete user.student;
         }
 
         const totalScore =
@@ -173,7 +167,8 @@ export class UserService {
               }
             : {}),
         };
-      });
+      }
+    });
   }
 
   async findPreLoginUserByEmail(
