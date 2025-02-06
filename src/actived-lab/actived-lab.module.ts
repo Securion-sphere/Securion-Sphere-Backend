@@ -12,9 +12,11 @@ import { Student } from "src/entities/student.entity";
 import { Supervisor } from "src/entities/supervisor.entity";
 import { Solvation } from "src/entities/solvation.entity";
 import { PreLoginUser } from "src/entities/pre-login-user.entity";
+import { HttpModule } from "@nestjs/axios";
 
 @Module({
   imports: [
+    HttpModule,
     TypeOrmModule.forFeature([
       ActivatedLab,
       Lab,
