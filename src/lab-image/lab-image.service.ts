@@ -18,7 +18,7 @@ import { AxiosError } from "axios";
 
 @Injectable()
 export class LabImageService {
-  dockerApiUrl = this.configService.get<string>("docker.api");
+  dockerApiUrl = this.configService.get<string>("dockerApi.url");
 
   constructor(
     @InjectRepository(LabImage)

@@ -38,7 +38,7 @@ export class HealthController {
         try {
           await this.http.pingCheck(
             "docker-api-microservice",
-            this.configService.get<string>("dockerApi.url"),
+            `${this.configService.get<string>("dockerApi.url")}/health`,
           );
           return { status: "ok", service: "docker-api-microservice" };
         } catch (error) {
