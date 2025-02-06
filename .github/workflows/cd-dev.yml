@@ -12,6 +12,8 @@ env:
     CLIENT_ID: ${{ secrets.CLIENT_ID }}
     CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
     CALLBACK_URL: ${{ secrets.CALLBACK_URL }}
+    DOCKER_API_HOST: ${{secrets.DOCKER_API_HOST}}
+    DOCKER_API_URL: ${{secrets.DOCKER_API_URL}}
     JWT_SECRET: ${{ secrets.JWT_SECRET }}
     JWT_EXPIRE_IN: ${{ secrets.JWT_EXPIRE_IN }}
     REFRESH_JWT_SECRET: ${{ secrets.REFRESH_JWT_SECRET }}

@@ -1,11 +1,11 @@
 # Base stage (Common dependencies)
 FROM node:20-alpine AS base
 WORKDIR /app
+RUN apk add --no-cache libc6-compat curl
 RUN npm install -g corepack
 
 # Install system dependencies only when needed
 FROM base AS dependencies
-RUN apk add --no-cache libc6-compat curl
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* ./
 RUN \
     if [ "$NODE_ENV" = "production" ]; then \

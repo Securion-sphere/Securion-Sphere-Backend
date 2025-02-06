@@ -43,7 +43,7 @@ export class LabImageService {
 
     const { data } = await lastValueFrom(
       this.httpService
-        .post<ImageUploadRes>(this.dockerApiUrl + "/image", form)
+        .post<ImageUploadRes>(`${this.dockerApiUrl}/image`, form)
         .pipe(
           catchError((error: AxiosError) => {
             return throwError(() => error);
