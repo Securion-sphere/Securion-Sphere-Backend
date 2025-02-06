@@ -28,6 +28,7 @@ export class LabImageService {
   ) {}
 
   async create(
+    token: string,
     createLabImageDto: CreateLabImageDto,
     file: Express.Multer.File,
   ): Promise<LabImage> {
@@ -36,17 +37,22 @@ export class LabImageService {
     }
 
     const form = new FormData();
-    form.append("file", Buffer.from(file.buffer), {
+    form.append("image", Buffer.from(file.buffer), {
       filename: file.originalname,
       contentType: file.mimetype,
     });
 
     const { data } = await lastValueFrom(
       this.httpService
-        .post<ImageUploadRes>(`${this.dockerApiUrl}/image`, form)
+        .post<ImageUploadRes>(`${this.dockerApiUrl}/image`, form, {
+          headers: { ...form.getHeaders(), Authorization: token },
+        })
         .pipe(
           catchError((error: AxiosError) => {
-            return throwError(() => error);
+            const status = error.response?.status || 500;
+            const message = error.response?.data || "Internal server error";
+
+            throw new HttpException({ error: message }, status);
           }),
         ),
     );
@@ -63,17 +69,21 @@ export class LabImageService {
     return this.labImageRepository.find();
   }
 
-  async findOne(id: string) {
+  async findOne(token: string, id: string) {
     try {
       await lastValueFrom(
-        this.httpService.get(`${this.dockerApiUrl}/image/${id}`).pipe(
-          catchError((error: AxiosError) => {
-            const status = error.response?.status || 500;
-            const message = error.response?.data || "Internal server error";
+        this.httpService
+          .get(`${this.dockerApiUrl}/image/${id}`, {
+            headers: { Authorization: token },
+          })
+          .pipe(
+            catchError((error: AxiosError) => {
+              const status = error.response?.status || 500;
+              const message = error.response?.data || "Internal server error";
 
-            throw new HttpException({ error: message }, status);
-          }),
-        ),
+              throw new HttpException({ error: message }, status);
+            }),
+          ),
       );
     } catch (err) {
       throw new InternalServerErrorException(err);
@@ -89,19 +99,23 @@ export class LabImageService {
     return image;
   }
 
-  async remove(id: string) {
-    const lab = await this.findOne(id);
+  async remove(token: string, id: string) {
+    const lab = await this.findOne(token, id);
     if (!lab) {
       throw new NotFoundException();
     }
 
     try {
       await lastValueFrom(
-        this.httpService.delete(`${this.dockerApiUrl}/image/${id}`).pipe(
-          catchError((error: AxiosError) => {
-            return throwError(() => error);
-          }),
-        ),
+        this.httpService
+          .delete(`${this.dockerApiUrl}/image/${id}`, {
+            headers: { Authorization: token },
+          })
+          .pipe(
+            catchError((error: AxiosError) => {
+              return throwError(() => error);
+            }),
+          ),
       );
     } catch (err) {
       throw new InternalServerErrorException(err);

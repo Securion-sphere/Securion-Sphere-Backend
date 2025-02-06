@@ -6,5 +6,5 @@ export class CreateLabImageDto {
   image_name: string;
 
   @ApiProperty({ type: "string", format: "binary" })
-  file: Express.Multer.File;
+  image: Express.Multer.File;
 }
