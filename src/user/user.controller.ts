@@ -8,14 +8,18 @@ import {
   Delete,
   UseGuards,
   Req,
+  UseInterceptors,
+  UploadedFile,
 } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth/jwt-auth.guard";
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiConsumes, ApiTags } from "@nestjs/swagger";
 import { SupervisorGuard } from "./guards/role.guard";
 import { AddEmailsDto } from "./dto/add-email.dto";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { BulkUploadDto } from "./dto/bulk-upload.dto";
 
 @Controller("user")
 @ApiTags("user")
@@ -41,6 +45,18 @@ export class UserController {
   @UseGuards(JwtAuthGuard)
   findAll() {
     return this.userService.findAll();
+  }
+
+  @Post("bulk-add-csv")
+  @ApiBearerAuth("access-token")
+  @UseGuards(JwtAuthGuard, SupervisorGuard)
+  @ApiConsumes("multipart/form-data")
+  @UseInterceptors(FileInterceptor("file"))
+  async bulkAddUsersFromCsv(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() bulkUploadDto: BulkUploadDto,
+  ) {
+    return this.userService.bulkAddUsersFromCsv(file, bulkUploadDto.role);
   }
 
   @Get("pre-login")
