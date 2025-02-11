@@ -18,15 +18,14 @@ import { AxiosError } from "axios";
 
 @Injectable()
 export class LabImageService {
+  dockerApiUrl = this.configService.get<string>("dockerApi.url");
+
   constructor(
     @InjectRepository(LabImage)
     private readonly labImageRepository: Repository<LabImage>,
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {}
-
-  private readonly dockerApiUrl =
-    this.configService.get<string>("dockerApi.url");
 
   async create(
     token: string,

@@ -6,7 +6,6 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { Lab } from "src/entities/lab.entity";
 import { Supervisor } from "src/entities/supervisor.entity";
 import { LabImage } from "src/entities/lab-image.entity";
-import { User } from "src/entities/user.entity";
 
 @Injectable()
 export class LabService {
@@ -17,18 +16,14 @@ export class LabService {
     private readonly supervisorRepository: Repository<Supervisor>,
     @InjectRepository(LabImage)
     private readonly labImageRepository: Repository<LabImage>,
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
     private readonly dataSource: DataSource,
   ) {}
 
-  async create(createLabDto: CreateLabDto & { userId: number }): Promise<Lab> {
-    const { userId, labImageId, ...labData } = createLabDto;
-
-    const user = await this.userRepository.findOneBy({ id: userId });
+  async create(createLabDto: CreateLabDto): Promise<Lab> {
+    const { creatorId, labImageId, ...labData } = createLabDto;
 
     const supervisor = await this.supervisorRepository.findOneBy({
-      user: user,
+      id: creatorId,
     });
 
     if (!supervisor) {
@@ -125,7 +120,6 @@ export class LabService {
     const creator = await this.supervisorRepository.findOne({
       where: { id: creatorId },
     });
-
     if (!creator) {
       throw new NotFoundException(`Creator with id ${creatorId} not found`);
     }
