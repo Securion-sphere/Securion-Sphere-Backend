@@ -253,7 +253,6 @@ export class UserService {
       .leftJoinAndSelect("student.solved_lab", "solvation")
       .leftJoinAndSelect("solvation.lab", "solvedLab")
       .leftJoinAndSelect("user.supervisor", "supervisor")
-      .leftJoinAndSelect("supervisor.labs", "createdLab")
       .select([
         "user.id",
         "user.firstName",
@@ -268,10 +267,6 @@ export class UserService {
         "solvedLab.category",
         "solvedLab.point",
         "supervisor",
-        "createdLab.id",
-        "createdLab.name",
-        "createdLab.category",
-        "createdLab.point",
       ])
       .getMany();
 
@@ -341,7 +336,6 @@ export class UserService {
       .leftJoinAndSelect("student.solved_lab", "solvation")
       .leftJoinAndSelect("solvation.lab", "solvedLab")
       .leftJoinAndSelect("user.supervisor", "supervisor")
-      .leftJoinAndSelect("supervisor.labs", "createdLab")
       .select([
         "user.id",
         "user.firstName",
@@ -356,10 +350,6 @@ export class UserService {
         "solvedLab.category",
         "solvedLab.point",
         "supervisor",
-        "createdLab.id",
-        "createdLab.name",
-        "createdLab.category",
-        "createdLab.point",
       ])
       .where("user.id = :id", { id })
       .getOne();
@@ -371,6 +361,8 @@ export class UserService {
       if (!user.supervisor) {
         delete user.supervisor;
       }
+    } else {
+      throw new NotFoundException("User is not found");
     }
 
     const totalScore =
