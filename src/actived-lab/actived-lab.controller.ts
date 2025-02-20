@@ -12,7 +12,7 @@ import { JwtAuthGuard } from "src/auth/guards/jwt-auth/jwt-auth.guard";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { CreateLabInstanceDto } from "./dto/active-lab.dto";
 import { SubmitFlagDto } from "./dto/submit-flag.dto";
-import { GetLabInstanceResponseDto } from "./dto/get-instance.dto";
+import { Request } from "express";
 
 @Controller("actived-lab")
 @ApiTags("active-lab")
@@ -23,20 +23,26 @@ export class ActivedLabController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
   async active(
-    @Req() req: { user: { id: number } },
+    @Req() req: Request & { user: { id: number } },
     @Body() createLabInstanceDto: CreateLabInstanceDto,
   ) {
-    return this.activedLabService.active({
-      userId: req.user.id,
-      ...createLabInstanceDto,
-    });
+    return this.activedLabService.active(
+      {
+        userId: req.user.id,
+        ...createLabInstanceDto,
+      },
+      req.headers["authorization"],
+    );
   }
 
   @Delete()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
-  async deactivate(@Req() req: { user: { id: number } }) {
-    return this.activedLabService.deactivate(req.user.id);
+  async deactivate(@Req() req: Request & { user: { id: number } }) {
+    return this.activedLabService.deactivate(
+      req.user.id,
+      req.headers["authorization"],
+    );
   }
 
   @Post("submit-flag")
@@ -55,9 +61,7 @@ export class ActivedLabController {
   @Get("get-instance")
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
-  async getInstance(
-    @Req() req: { user: { id: number } },
-  ): Promise<GetLabInstanceResponseDto> {
+  async getInstance(@Req() req: { user: { id: number } }) {
     return this.activedLabService.getInstance(req.user.id);
   }
 }

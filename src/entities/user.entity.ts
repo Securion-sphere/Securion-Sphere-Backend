@@ -7,33 +7,42 @@ import {
 } from "typeorm";
 import { Student } from "./student.entity";
 import { Supervisor } from "./supervisor.entity";
-import { ActivatedLab } from "./actived-lab.entity";
+import { ActivedLab } from "./actived-lab.entity";
 
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true })
+  @Column({ name: "first_name" })
   firstName: string;
 
-  @Column({ nullable: true })
+  @Column({ name: "last_name" })
   lastName: string;
 
-  @Column({ nullable: true })
+  @Column({
+    name: "nick_name",
+    type: "varchar",
+    length: 30,
+    nullable: true,
+    unique: true,
+  })
   nickName: string;
 
-  @Column({ nullable: true })
-  profile_img: string;
+  @Column({ name: "profile_image", nullable: true })
+  profileImg: string;
 
   @Column()
   email: string;
 
-  @OneToOne(() => ActivatedLab, (activatedLab) => activatedLab.instanceOwner)
-  @JoinColumn({ name: "active_lab_id" })
-  activate_lab: ActivatedLab;
+  @OneToOne(() => ActivedLab, (activedLab) => activedLab.instanceOwner)
+  @JoinColumn({ name: "actived_lab_id" })
+  activedLab: ActivedLab;
 
-  @Column({ nullable: true })
+  @Column({ name: "ovpn_ip_address", nullable: true })
+  ovpnIPAddress: string;
+
+  @Column({ name: "hashed_refresh_token", nullable: true, unique: true })
   hashedRefreshToken: string;
 
   @OneToOne(() => Student, (student) => student.user)

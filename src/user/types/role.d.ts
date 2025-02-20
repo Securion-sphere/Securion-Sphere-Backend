@@ -1,6 +1,6 @@
 import { User } from "src/entities/user.entity";
 
 export type Role = {
-  role: "Supervisor" | "Student";
+  role: "supervisor" | "student";
   user: User;
 };

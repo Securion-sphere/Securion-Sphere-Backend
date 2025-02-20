@@ -17,7 +17,7 @@ import { Readable } from "stream";
 export class UserService {
   constructor(
     @InjectRepository(User)
-    private readonly userRepo: Repository<User>,
+    private readonly userRepository: Repository<User>,
     @InjectRepository(Student)
     private readonly studentRepo: Repository<Student>,
     @InjectRepository(Supervisor)
@@ -103,7 +103,7 @@ export class UserService {
             where: { email },
           });
 
-          const existingUser = await this.userRepo.findOne({
+          const existingUser = await this.userRepository.findOne({
             where: { email },
           });
 
@@ -157,32 +157,29 @@ export class UserService {
   }
 
   async create(createUserDto: CreateUserDto) {
-    const user = this.userRepo.create(createUserDto);
-    const resUser = await this.userRepo.save(user);
-    const preLoginUser = await this.preLoginUserRepo.findOne({
-      where: { email: user.email },
-    });
+    const user = this.userRepository.create(createUserDto);
+    const resUser = await this.userRepository.save(user);
 
-    let role: Role = null;
+    let roleRes: Role = null;
 
-    if (preLoginUser?.role === "student") {
+    if (createUserDto.role === "student") {
       await this.studentRepo.save(
         this.studentRepo.create({
           user: resUser,
           solved_lab: [],
         }),
       );
-      role = { role: "Student", user: resUser };
-    } else if (preLoginUser?.role === "supervisor") {
+      roleRes = { role: "student", user: resUser };
+    } else if (createUserDto.role === "supervisor") {
       await this.supervisorRepo.save(
         this.supervisorRepo.create({
           user: resUser,
         }),
       );
-      role = { role: "Supervisor", user: resUser };
+      roleRes = { role: "supervisor", user: resUser };
     }
 
-    return role;
+    return roleRes;
   }
 
   async addEmails(addEmailsDto: AddEmailsDto): Promise<{
@@ -200,7 +197,7 @@ export class UserService {
         });
 
         // Check if email already exists in user table
-        const existingUser = await this.userRepo.findOne({
+        const existingUser = await this.userRepository.findOne({
           where: { email },
         });
 
@@ -242,7 +239,7 @@ export class UserService {
   }
 
   async findByEmail(email: string) {
-    return this.userRepo.findOne({
+    return this.userRepository.findOne({
       where: {
         email,
       },
@@ -250,7 +247,7 @@ export class UserService {
   }
 
   async findAll() {
-    const users = await this.userRepo
+    const users = await this.userRepository
       .createQueryBuilder("user")
       .leftJoinAndSelect("user.student", "student")
       .leftJoinAndSelect("student.solved_lab", "solvation")
@@ -338,7 +335,7 @@ export class UserService {
   }
 
   async findOne(id: number) {
-    const user = await this.userRepo
+    const user = await this.userRepository
       .createQueryBuilder("user")
       .leftJoinAndSelect("user.student", "student")
       .leftJoinAndSelect("student.solved_lab", "solvation")
@@ -398,46 +395,35 @@ export class UserService {
 
   async update(id: number, updateUserDto: UpdateUserDto) {
     // Check if the user exists
-    const user = await this.userRepo.findOneBy({ id });
+    const user = await this.userRepository.findOneBy({ id });
 
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    if (updateUserDto.student) {
-      const student = await this.studentRepo.findOneBy({ user });
-      if (!student) throw new NotFoundException(`This user is not a student`);
-
-      Object.assign(student, updateUserDto.student);
-      await this.studentRepo.save(student);
-    }
-
-    // Update the user entity with new values
-    Object.assign(user, updateUserDto);
-
     // Save the updated user to the database
-    return this.userRepo.save(user);
+    return this.userRepository.update({ id }, updateUserDto);
   }
 
   async countUsers(): Promise<number> {
-    const count = await this.userRepo.count();
+    const count = await this.userRepository.count();
     return count;
   }
 
   async remove(id: number) {
     // Check if the user exists
-    const user = await this.userRepo.findOneBy({ id });
+    const user = await this.userRepository.findOneBy({ id });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
     // Delete the user from the database
-    await this.userRepo.delete(id);
+    await this.userRepository.delete(id);
 
     return { message: `User with ID ${id} has been removed` };
   }
 
   async updateHashedRefreshToken(userId: number, hashedRefreshToken: string) {
-    return this.userRepo.update({ id: userId }, { hashedRefreshToken });
+    return this.userRepository.update({ id: userId }, { hashedRefreshToken });
   }
 }

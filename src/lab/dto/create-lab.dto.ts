@@ -19,13 +19,9 @@ export class CreateLabDto {
 
   @ApiProperty({ type: Number })
   @IsNumber()
-  creatorId: number;
-
-  @ApiProperty({ type: Number })
-  @IsNumber()
-  labImageId: number;
+  lab_image_id: number;
 
   @ApiProperty({ type: Boolean })
   @IsBoolean()
-  isActive?: boolean;
+  isReady?: boolean = true;
 }

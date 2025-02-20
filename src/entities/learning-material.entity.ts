@@ -5,24 +5,29 @@ export class LearningMaterial {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ type: "varchar", length: 255 })
   title: string;
 
-  @Column()
+  @Column({ type: "text" })
   description: string;
 
-  @Column({ nullable: true })
-  imageKey?: string;
+  @Column({ name: "image_key", type: "varchar", length: 255, nullable: true })
+  imageKey: string | null;
 
   @Column({ nullable: true })
-  category?: string;
+  category: string | null;
 
-  @Column()
+  @Column({ name: "file_name", type: "varchar", length: 255 })
   fileName: string;
 
-  @Column()
+  @Column({ name: "file_key", type: "varchar", length: 255, unique: true })
   fileKey: string;
 
-  @Column()
-  fileType: "pdf" | "md";
+  @Column({
+    name: "file_type",
+    type: "enum",
+    enum: ["pdf", "md"],
+    nullable: true,
+  })
+  fileType: "pdf" | "md" | null;
 }

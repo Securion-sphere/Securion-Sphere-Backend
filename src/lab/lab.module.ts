@@ -8,7 +8,7 @@ import { LabImage } from "src/entities/lab-image.entity";
 import { User } from "src/entities/user.entity";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Lab, Supervisor, User, LabImage])],
+  imports: [TypeOrmModule.forFeature([Lab, User, LabImage, Supervisor])],
   controllers: [LabController],
   providers: [LabService],
 })

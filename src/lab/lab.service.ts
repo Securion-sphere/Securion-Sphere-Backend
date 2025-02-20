@@ -4,7 +4,6 @@ import { UpdateLabDto } from "./dto/update-lab.dto";
 import { DataSource, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Lab } from "src/entities/lab.entity";
-import { Supervisor } from "src/entities/supervisor.entity";
 import { LabImage } from "src/entities/lab-image.entity";
 
 @Injectable()
@@ -12,23 +11,13 @@ export class LabService {
   constructor(
     @InjectRepository(Lab)
     private readonly labRepository: Repository<Lab>,
-    @InjectRepository(Supervisor)
-    private readonly supervisorRepository: Repository<Supervisor>,
     @InjectRepository(LabImage)
     private readonly labImageRepository: Repository<LabImage>,
     private readonly dataSource: DataSource,
   ) {}
 
   async create(createLabDto: CreateLabDto): Promise<Lab> {
-    const { creatorId, labImageId, ...labData } = createLabDto;
-
-    const supervisor = await this.supervisorRepository.findOneBy({
-      id: creatorId,
-    });
-
-    if (!supervisor) {
-      throw new Error("Supervisor not found");
-    }
+    const { lab_image_id: labImageId, ...labData } = createLabDto;
 
     const labImage = await this.labImageRepository.findOneBy({
       id: labImageId,
@@ -36,7 +25,6 @@ export class LabService {
 
     const newLab = this.labRepository.create({
       ...labData,
-      creator: supervisor,
       labImage,
     });
 
@@ -46,11 +34,9 @@ export class LabService {
   async findAll() {
     const labs = await this.labRepository
       .createQueryBuilder("lab")
-      .leftJoinAndSelect("lab.creator", "creator")
-      .leftJoinAndSelect("creator.user", "user")
       .leftJoinAndSelect("lab.solved_by", "solvation")
       .leftJoinAndSelect("solvation.student", "student")
-      .leftJoinAndSelect("student.user", "studentUser")
+      .leftJoinAndSelect("student.user", "user")
       .select([
         "lab.id",
         "lab.name",
@@ -58,11 +44,9 @@ export class LabService {
         "lab.point",
         "lab.category",
         "lab.isReady",
-        "creator.id",
-        "user.nickName",
-        "solvation",
-        "student",
-        "studentUser.nickName",
+        "solvation.solved_at",
+        "student.user",
+        "user.nick_name",
       ])
       .getMany();
 
@@ -72,8 +56,6 @@ export class LabService {
   async findOne(id: number) {
     const lab = await this.labRepository
       .createQueryBuilder("lab")
-      .leftJoinAndSelect("lab.creator", "creator")
-      .leftJoinAndSelect("creator.user", "user")
       .leftJoinAndSelect("lab.solved_by", "solvation")
       .leftJoinAndSelect("solvation.student", "student")
       .leftJoinAndSelect("student.user", "studentUser")
@@ -84,7 +66,6 @@ export class LabService {
         "lab.point",
         "lab.category",
         "lab.isReady",
-        "creator.id",
         "user.nickName",
         "solvation",
         "student",
@@ -104,8 +85,7 @@ export class LabService {
       point: lab.point,
       category: lab.category,
       isReady: lab.isReady,
-      creatorName: lab.creator?.user?.nickName || "unknown",
-      solvedBy: lab.solved_by,
+      solvedBy: lab.solvedBy,
     };
   }
 
@@ -115,31 +95,15 @@ export class LabService {
       throw new NotFoundException();
     }
 
-    const { creatorId, labImageId, ...labDto } = updateLabDto;
-
-    const creator = await this.supervisorRepository.findOne({
-      where: { id: creatorId },
-    });
-    if (!creator) {
-      throw new NotFoundException(`Creator with id ${creatorId} not found`);
-    }
-
-    const labImage = await this.labImageRepository.findOne({
-      where: { id: labImageId },
-    });
-    if (!labImage) {
-      throw new NotFoundException(`LabImage with id ${labImageId} not found`);
-    }
+    const { ...updatedData } = updateLabDto;
 
     await this.labRepository.update(id, {
-      ...labDto,
-      creator,
-      labImage,
+      ...updatedData,
     });
 
     return this.labRepository.findOne({
       where: { id },
-      relations: ["labImage", "creator"],
+      relations: ["labImage"],
     });
   }
 

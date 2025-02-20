@@ -1,17 +1,13 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Lab } from "./lab.entity";
+import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity()
 export class LabImage {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ type: "text", unique: true })
-  image_name: string;
+  @Column({ name: "image_name", type: "text", unique: true })
+  imageName: string;
 
-  @Column({ type: "text", unique: true })
-  image_id: string;
-
-  @OneToMany(() => Lab, (lab) => lab["image-id"])
-  lab_used: Lab[];
+  @Column({ name: "image_id", type: "text", unique: true })
+  imageId: string;
 }

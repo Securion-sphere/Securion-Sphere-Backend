@@ -22,6 +22,14 @@ module.exports = {
     "@typescript-eslint/explicit-module-boundary-types": "off",
     "@typescript-eslint/no-explicit-any": "off",
     "@typescript-eslint/return-await": "error",
-    "prettier/prettier": ["error", { singleQuote: false }],
+    "prettier/prettier": [
+      "error",
+      {
+        semi: true,
+        tabWidth: 2,
+        singleQuote: false,
+        trailingComma: "all",
+      },
+    ],
   },
 };
