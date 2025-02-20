@@ -35,6 +35,6 @@ export class Lab {
   @OneToMany(() => Solvation, (solvation) => solvation.lab)
   solvedBy: Solvation[];
 
-  @Column({ type: "boolean", default: false })
+  @Column({ name: "is_ready", type: "boolean", default: false })
   isReady: boolean;
 }
