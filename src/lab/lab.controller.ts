@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  Req,
 } from "@nestjs/common";
 import { LabService } from "./lab.service";
 import { CreateLabDto } from "./dto/create-lab.dto";
@@ -23,8 +24,11 @@ export class LabController {
   @Post()
   @UseGuards(JwtAuthGuard, SupervisorGuard)
   @ApiBearerAuth("access-token")
-  create(@Body() createLabDto: CreateLabDto) {
-    return this.labService.create(createLabDto);
+  create(
+    @Req() req: { user: { id: number } },
+    @Body() createLabDto: CreateLabDto,
+  ) {
+    return this.labService.create({ userId: req.user.id, ...createLabDto });
   }
 
   @Get()

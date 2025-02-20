@@ -5,6 +5,7 @@ import { DataSource, Repository } from "typeorm";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Lab } from "src/entities/lab.entity";
 import { LabImage } from "src/entities/lab-image.entity";
+import { User } from "src/entities/user.entity";
 
 @Injectable()
 export class LabService {
@@ -13,11 +14,28 @@ export class LabService {
     private readonly labRepository: Repository<Lab>,
     @InjectRepository(LabImage)
     private readonly labImageRepository: Repository<LabImage>,
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
     private readonly dataSource: DataSource,
   ) {}
 
+<<<<<<< HEAD
   async create(createLabDto: CreateLabDto): Promise<Lab> {
     const { lab_image_id: labImageId, ...labData } = createLabDto;
+=======
+  async create(createLabDto: CreateLabDto & { userId: number }): Promise<Lab> {
+    const { userId, labImageId, ...labData } = createLabDto;
+
+    const user = await this.userRepository.findOneBy({ id: userId });
+
+    const supervisor = await this.supervisorRepository.findOneBy({
+      user: user,
+    });
+
+    if (!supervisor) {
+      throw new Error("Supervisor not found");
+    }
+>>>>>>> origin/dev
 
     const labImage = await this.labImageRepository.findOneBy({
       id: labImageId,
@@ -95,7 +113,26 @@ export class LabService {
       throw new NotFoundException();
     }
 
+<<<<<<< HEAD
     const { ...updatedData } = updateLabDto;
+=======
+    const { creatorId, labImageId, ...labDto } = updateLabDto;
+
+    const creator = await this.supervisorRepository.findOne({
+      where: { id: creatorId },
+    });
+
+    if (!creator) {
+      throw new NotFoundException(`Creator with id ${creatorId} not found`);
+    }
+
+    const labImage = await this.labImageRepository.findOne({
+      where: { id: labImageId },
+    });
+    if (!labImage) {
+      throw new NotFoundException(`LabImage with id ${labImageId} not found`);
+    }
+>>>>>>> origin/dev
 
     await this.labRepository.update(id, {
       ...updatedData,

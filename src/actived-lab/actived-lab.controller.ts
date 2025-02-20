@@ -49,7 +49,7 @@ export class ActivedLabController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
   async submitFlag(
-    @Req() req: { user: { id: number } },
+    @Req() req: Request & { user: { id: number } },
     @Body() submitFlagDto: SubmitFlagDto,
   ) {
     return this.activedLabService.submitFlag({

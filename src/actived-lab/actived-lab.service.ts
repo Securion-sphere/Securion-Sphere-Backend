@@ -25,18 +25,18 @@ export class ActivedLabService {
   constructor(
     @InjectRepository(ActivedLab)
     private activeLabRepository: Repository<ActivedLab>,
-    private readonly configService: ConfigService,
     @InjectRepository(User)
     private userRepository: Repository<User>,
     @InjectRepository(Lab)
     private labRepository: Repository<Lab>,
     @InjectRepository(Solvation)
     private solvationRepository: Repository<Solvation>,
-
+    private readonly configService: ConfigService,
     private readonly httpService: HttpService,
   ) {}
 
-  dockerApiUrl = this.configService.get<string>("dockerApi.url");
+  private readonly dockerApiUrl =
+    this.configService.get<string>("dockerApi.url");
 
   async active(
     createLabInstanceDto: CreateLabInstanceDto & { userId: number },
