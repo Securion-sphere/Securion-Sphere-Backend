@@ -13,7 +13,7 @@ export class Student {
   @PrimaryColumn({ type: "int", nullable: false })
   user_id: number;
 
-  @OneToOne(() => User, {
+  @OneToOne(() => User, (user) => user.student, {
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
   })
@@ -21,5 +21,5 @@ export class Student {
   user: User;
 
   @OneToMany(() => Solvation, (solvation) => solvation.student)
-  solved_lab: Solvation[];
+  solvedLab: Solvation[];
 }

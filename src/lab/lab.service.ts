@@ -37,9 +37,9 @@ export class LabService {
   async findAll() {
     const labs = await this.labRepository
       .createQueryBuilder("lab")
-      .leftJoinAndSelect("lab.solved_by", "solvation")
+      .leftJoinAndSelect("lab.solvedBy", "solvation")
       .leftJoinAndSelect("solvation.student", "student")
-      .leftJoinAndSelect("student.user", "user")
+      .leftJoinAndSelect("student.user", "user") // This makes sure user is joined through student
       .select([
         "lab.id",
         "lab.name",
@@ -47,21 +47,45 @@ export class LabService {
         "lab.point",
         "lab.category",
         "lab.isReady",
-        "solvation.solved_at",
-        "student.user",
-        "user.nick_name",
+        "solvation.solvedAt",
+        "student.user_id",
+        "user.id",
+        "user.firstName",
+        "user.lastName",
+        "user.nickName",
+        "user.email",
+        "user.profileImg",
       ])
       .getMany();
 
-    return labs;
+    return labs.map((lab) => ({
+      id: lab.id,
+      name: lab.name,
+      description: lab.description,
+      point: lab.point,
+      category: lab.category,
+      solvedBy: lab.solvedBy.map((solvation) => ({
+        user: solvation.student.user
+          ? {
+              id: solvation.student.user.id,
+              firstName: solvation.student.user.firstName,
+              lastName: solvation.student.user.lastName,
+              nickName: solvation.student.user.nickName,
+              email: solvation.student.user.email,
+              profileImg: solvation.student.user.profileImg,
+            }
+          : null,
+        solvedAt: solvation.solvedAt,
+      })),
+    }));
   }
 
   async findOne(id: number) {
     const lab = await this.labRepository
       .createQueryBuilder("lab")
-      .leftJoinAndSelect("lab.solved_by", "solvation")
+      .leftJoinAndSelect("lab.solvedBy", "solvation")
       .leftJoinAndSelect("solvation.student", "student")
-      .leftJoinAndSelect("student.user", "studentUser")
+      .leftJoinAndSelect("student.user", "user") // This makes sure user is joined through student
       .select([
         "lab.id",
         "lab.name",
@@ -69,10 +93,14 @@ export class LabService {
         "lab.point",
         "lab.category",
         "lab.isReady",
+        "solvation.solvedAt",
+        "student.user_id",
+        "user.id",
+        "user.firstName",
+        "user.lastName",
         "user.nickName",
-        "solvation",
-        "student",
-        "studentUser.nickName",
+        "user.email",
+        "user.profileImg",
       ])
       .where("lab.id = :id", { id })
       .getOne();
@@ -87,8 +115,19 @@ export class LabService {
       description: lab.description,
       point: lab.point,
       category: lab.category,
-      isReady: lab.isReady,
-      solvedBy: lab.solvedBy,
+      solvedBy: lab.solvedBy.map((solvation) => ({
+        user: solvation.student.user
+          ? {
+              id: solvation.student.user.id,
+              firstName: solvation.student.user.firstName,
+              lastName: solvation.student.user.lastName,
+              nickName: solvation.student.user.nickName,
+              email: solvation.student.user.email,
+              profileImg: solvation.student.user.profileImg,
+            }
+          : null,
+        solvedAt: solvation.solvedAt,
+      })),
     };
   }
 

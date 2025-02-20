@@ -6,7 +6,7 @@ export class Supervisor {
   @PrimaryColumn({ type: "int", nullable: false })
   user_id: number;
 
-  @OneToOne(() => User, {
+  @OneToOne(() => User, (user) => user.student, {
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
   })

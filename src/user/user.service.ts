@@ -166,7 +166,7 @@ export class UserService {
       await this.studentRepo.save(
         this.studentRepo.create({
           user: resUser,
-          solved_lab: [],
+          solvedLab: [],
         }),
       );
       roleRes = { role: "student", user: resUser };
@@ -250,7 +250,7 @@ export class UserService {
     const users = await this.userRepository
       .createQueryBuilder("user")
       .leftJoinAndSelect("user.student", "student")
-      .leftJoinAndSelect("student.solved_lab", "solvation")
+      .leftJoinAndSelect("student.solvedLab", "solvation")
       .leftJoinAndSelect("solvation.lab", "solvedLab")
       .leftJoinAndSelect("user.supervisor", "supervisor")
       .select([
@@ -280,7 +280,7 @@ export class UserService {
         };
       } else if (user.student) {
         const totalScore =
-          user.student?.solved_lab?.reduce((score, solvation) => {
+          user.student?.solvedLab?.reduce((score, solvation) => {
             return score + (solvation.lab?.point || 0);
           }, 0) || 0;
         return {
@@ -288,7 +288,7 @@ export class UserService {
           role: "student",
           student: {
             score: totalScore,
-            solvedLab: user.student.solved_lab ?? [],
+            solvedLab: user.student.solvedLab ?? [],
           },
           supervisor: undefined,
         };
@@ -335,7 +335,7 @@ export class UserService {
     const user = await this.userRepository
       .createQueryBuilder("user")
       .leftJoinAndSelect("user.student", "student")
-      .leftJoinAndSelect("student.solved_lab", "solvation")
+      .leftJoinAndSelect("student.solvedLab", "solvation")
       .leftJoinAndSelect("solvation.lab", "solvedLab")
       .leftJoinAndSelect("user.supervisor", "supervisor")
       .select([
@@ -346,7 +346,7 @@ export class UserService {
         "user.profileImg",
         "user.email",
         "supervisor.user_id",
-        "student",
+        "student.user_id",
         "solvation",
         "solvedLab.id",
         "solvedLab.name",
@@ -355,6 +355,10 @@ export class UserService {
       ])
       .where("user.id = :id", { id })
       .getOne();
+
+    if (!user) {
+      throw new NotFoundException("User is not found");
+    }
 
     if (user.supervisor) {
       return {
@@ -365,7 +369,7 @@ export class UserService {
       };
     } else if (user.student) {
       const totalScore =
-        user.student?.solved_lab?.reduce((score, solvation) => {
+        user.student?.solvedLab?.reduce((score, solvation) => {
           return score + (solvation.lab?.point || 0);
         }, 0) || 0;
       return {
@@ -373,11 +377,12 @@ export class UserService {
         role: "student",
         student: {
           score: totalScore,
-          solvedLab: user.student.solved_lab ?? [],
+          solvedLab: user.student.solvedLab ?? [],
         },
         supervisor: undefined,
       };
     }
+
     return {
       ...user,
       supervisor: undefined,

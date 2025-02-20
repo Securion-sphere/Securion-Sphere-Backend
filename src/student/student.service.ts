@@ -20,7 +20,7 @@ export class StudentService {
           lastName: true,
           nickName: true,
         },
-        solved_lab: {
+        solvedLab: {
           lab: {
             id: true,
             name: true,
@@ -32,7 +32,7 @@ export class StudentService {
     });
 
     return students.map((student) => {
-      const totalScore = student.solved_lab.reduce((sum, solvedLab) => {
+      const totalScore = student.solvedLab.reduce((sum, solvedLab) => {
         return sum + (solvedLab.lab?.point || 0);
       }, 0);
 
@@ -54,7 +54,7 @@ export class StudentService {
           lastName: true,
           nickName: true,
         },
-        solved_lab: {
+        solvedLab: {
           lab: {
             id: true,
             name: true,
@@ -69,7 +69,7 @@ export class StudentService {
       throw new NotFoundException("Student not found");
     }
 
-    const totalScore = student.solved_lab.reduce((sum, solvedLab) => {
+    const totalScore = student.solvedLab.reduce((sum, solvedLab) => {
       return sum + (solvedLab.lab?.point || 0);
     }, 0);
 

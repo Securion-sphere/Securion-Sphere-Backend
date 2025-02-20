@@ -10,7 +10,7 @@ export class Solvation {
   @PrimaryColumn({ name: "lab_id", type: "int" })
   labId: number;
 
-  @ManyToOne(() => Student, (student) => student.solved_lab, {
+  @ManyToOne(() => Student, (student) => student.solvedLab, {
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
   })
