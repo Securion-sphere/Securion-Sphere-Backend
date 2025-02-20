@@ -10,18 +10,19 @@ import { User } from "./user.entity";
 import { Lab } from "./lab.entity";
 
 @Entity()
-export class ActivatedLab {
+export class ActivedLab {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @OneToOne(() => User, (user) => user.activate_lab)
-  @JoinColumn()
+  @OneToOne(() => User, (user) => user.activedLab)
+  @JoinColumn({ name: "user_id" })
   instanceOwner: User;
 
-  @ManyToOne(() => Lab, (lab) => lab.id)
+  @ManyToOne(() => Lab)
+  @JoinColumn({ name: "lab_id" })
   instanceLab: Lab;
 
-  @Column()
+  @Column({ name: "container_id" })
   containerId: string;
 
   @Column()

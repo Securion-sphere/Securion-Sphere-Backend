@@ -1,22 +1,15 @@
-import {
-  Entity,
-  JoinColumn,
-  OneToMany,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from "typeorm";
+import { Entity, JoinColumn, OneToOne, PrimaryColumn } from "typeorm";
 import { User } from "./user.entity";
-import { Lab } from "./lab.entity";
 
 @Entity()
 export class Supervisor {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn({ type: "int", nullable: false })
+  user_id: number;
 
-  @OneToOne(() => User)
-  @JoinColumn({ name: "userId" })
+  @OneToOne(() => User, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
+  @JoinColumn({ name: "user_id" })
   user: User;
-
-  @OneToMany(() => Lab, (lab) => lab.creator)
-  labs: Lab[];
 }

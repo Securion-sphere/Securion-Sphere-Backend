@@ -1,11 +1,11 @@
 import {
   Column,
   Entity,
-  ManyToOne,
+  JoinColumn,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from "typeorm";
-import { Supervisor } from "./supervisor.entity";
 import { LabImage } from "./lab-image.entity";
 import { Solvation } from "./solvation.entity";
 
@@ -26,14 +26,14 @@ export class Lab {
   @Column({ type: "text" })
   category: string;
 
-  @ManyToOne(() => Supervisor, (supervisor) => supervisor.labs)
-  creator: Supervisor;
-
-  @ManyToOne(() => LabImage, (labImage) => labImage.image_name)
+  @OneToOne(() => LabImage, {
+    onDelete: "CASCADE",
+  })
+  @JoinColumn({ name: "lab_image_id" })
   labImage: LabImage;
 
   @OneToMany(() => Solvation, (solvation) => solvation.lab)
-  solved_by: Solvation[];
+  solvedBy: Solvation[];
 
   @Column({ type: "boolean", default: false })
   isReady: boolean;

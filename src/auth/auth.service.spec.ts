@@ -2,7 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { AuthService } from "./auth.service";
 import { UserService } from "src/user/user.service";
 import { JwtService } from "@nestjs/jwt";
-import { UnauthorizedException } from "@nestjs/common";
+import { NotFoundException, UnauthorizedException } from "@nestjs/common";
 import * as argon2 from "argon2";
 import refreshJwtConfig from "src/config/refresh-jwt.config";
 import { getRepositoryToken } from "@nestjs/typeorm";
@@ -72,8 +72,7 @@ describe("AuthService", () => {
 
     it("should return user not found if user does not exist", async () => {
       (userRepository.findOne as jest.Mock).mockResolvedValue(null);
-      const result = await authService.login(1);
-      expect(result).toEqual({ msg: "User not found" });
+      await expect(authService.login(1)).rejects.toThrow(NotFoundException);
     });
   });
 
@@ -139,8 +138,7 @@ describe("AuthService", () => {
       const result = await authService.validateGoogleUser({
         firstName: "test",
         lastName: "test",
-        nickName: null,
-        profile_img: null,
+        profileImg: null,
         email: "test@example.com",
       });
       expect(result).toEqual({ id: 1, email: "test@example.com" });
@@ -155,8 +153,7 @@ describe("AuthService", () => {
       const result = await authService.validateGoogleUser({
         firstName: "new",
         lastName: "new",
-        nickName: null,
-        profile_img: null,
+        profileImg: null,
         email: "new@example.com",
       });
       expect(result).toEqual({ id: 2, email: "new@example.com" });

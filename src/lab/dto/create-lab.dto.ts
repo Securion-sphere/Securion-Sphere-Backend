@@ -23,5 +23,5 @@ export class CreateLabDto {
 
   @ApiProperty({ type: Boolean })
   @IsBoolean()
-  isReady?: boolean;
+  isReady?: boolean = true;
 }

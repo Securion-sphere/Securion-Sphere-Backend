@@ -1,5 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsEmail, IsOptional, IsString, IsUrl, Matches } from "class-validator";
+import {
+  IsEmail,
+  IsEnum,
+  IsOptional,
+  IsString,
+  IsUrl,
+  Matches,
+} from "class-validator";
 
 export class CreateUserDto {
   @ApiProperty()
@@ -22,8 +29,12 @@ export class CreateUserDto {
   email: string;
 
   @ApiProperty()
+  @IsEnum(["student", "supervisor"])
+  role: "student" | "supervisor";
+
+  @ApiProperty()
   @IsUrl()
   @IsString()
   @IsOptional()
-  profile_img: string;
+  profileImg: string;
 }

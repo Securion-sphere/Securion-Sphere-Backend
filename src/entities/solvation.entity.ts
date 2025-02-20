@@ -1,21 +1,29 @@
-import { Column, Entity, ManyToOne, PrimaryColumn } from "typeorm";
+import { Column, Entity, JoinColumn, ManyToOne, PrimaryColumn } from "typeorm";
 import { Student } from "./student.entity";
 import { Lab } from "./lab.entity";
 
 @Entity()
 export class Solvation {
-  @PrimaryColumn()
+  @PrimaryColumn({ name: "student_id", type: "int" })
   studentId: number;
 
-  @PrimaryColumn()
+  @PrimaryColumn({ name: "lab_id", type: "int" })
   labId: number;
 
-  @ManyToOne(() => Student, (student) => student.solved_lab)
+  @ManyToOne(() => Student, (student) => student.solved_lab, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
+  @JoinColumn({ name: "student_id" })
   student: Student;
 
-  @ManyToOne(() => Lab, (lab) => lab.solved_by)
+  @ManyToOne(() => Lab, (lab) => lab.solvedBy, {
+    onDelete: "CASCADE",
+    onUpdate: "CASCADE",
+  })
+  @JoinColumn({ name: "lab_id" })
   lab: Lab;
 
-  @Column()
-  dateSolved: Date;
+  @Column({ name: "solved_at", type: "timestamp" })
+  solvedAt: Date;
 }

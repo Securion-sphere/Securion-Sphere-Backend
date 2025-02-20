@@ -59,8 +59,8 @@ export class LabImageService {
     );
 
     const newLabImage = this.labImageRepository.create({
-      image_name: createLabImageDto.image_name,
-      image_id: data.ID,
+      imageName: createLabImageDto.image_name,
+      imageId: data.ID,
     });
 
     return this.labImageRepository.save(newLabImage);
@@ -91,7 +91,7 @@ export class LabImageService {
     }
 
     const image = await this.labImageRepository.findOne({
-      where: { image_id: id },
+      where: { imageId: id },
     });
     if (!image) {
       throw new NotFoundException({ msg: "Image not found" });

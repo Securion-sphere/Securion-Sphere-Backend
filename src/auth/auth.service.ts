@@ -1,6 +1,10 @@
-import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
-import { CreateUserDto } from "src/user/dto/create-user.dto";
 import { UserService } from "src/user/user.service";
 import { AuthJwtPayload } from "./types/auth-jwtPayload";
 import refreshJwtConfig from "src/config/refresh-jwt.config";
@@ -9,6 +13,7 @@ import * as argon2 from "argon2";
 import { InjectRepository } from "@nestjs/typeorm";
 import { User } from "src/entities/user.entity";
 import { Repository } from "typeorm";
+import { CreateUserDto } from "src/user/dto/create-user.dto";
 
 @Injectable()
 export class AuthService {
@@ -21,17 +26,21 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
   ) {}
 
-  async login(userId: number) {
-    const user = await this.userRepository.findOne({ where: { id: userId } });
+  async login(id: number) {
+    const user = await this.userRepository.findOne({ where: { id } });
     if (!user) {
-      return { msg: "User not found" };
+      throw new NotFoundException("The user requested is not found");
     }
-    const { accessToken, refreshToken } = await this.generateTokens(userId);
+
+    const { accessToken, refreshToken } = await this.generateTokens(user.id);
     const hashedRefreshToken = await argon2.hash(refreshToken);
-    await this.userService.updateHashedRefreshToken(userId, hashedRefreshToken);
+    await this.userService.updateHashedRefreshToken(
+      user.id,
+      hashedRefreshToken,
+    );
 
     return {
-      id: userId,
+      id: user.id,
       accessToken,
       refreshToken,
     };
@@ -64,7 +73,15 @@ export class AuthService {
     return { id: userId };
   }
 
-  async validateGoogleUser(googleUser: CreateUserDto) {
+  async validateGoogleUser(googleUser: {
+    email: string;
+    firstName: string;
+    lastName: string;
+    profileImg: string | null;
+  }) {
+    const user = await this.userService.findByEmail(googleUser.email);
+    if (user) return user;
+
     const preLoginUser = await this.userService.findPreLoginUserByEmail(
       googleUser.email,
     );
@@ -74,9 +91,10 @@ export class AuthService {
       );
     }
 
-    const user = await this.userService.findByEmail(googleUser.email);
-    if (user) return user;
-    return this.userService.create(googleUser);
+    return this.userService.create({
+      ...googleUser,
+      role: preLoginUser.role,
+    } as CreateUserDto);
   }
 
   async refreshToken(userId: number) {

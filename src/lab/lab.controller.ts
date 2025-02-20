@@ -28,7 +28,7 @@ export class LabController {
     @Req() req: { user: { id: number } },
     @Body() createLabDto: CreateLabDto,
   ) {
-    return this.labService.create({ userId: req.user.id, ...createLabDto });
+    return this.labService.create(createLabDto);
   }
 
   @Get()
@@ -39,7 +39,7 @@ export class LabController {
   }
 
   @Get(":id")
-  @UseGuards(JwtAuthGuard, SupervisorGuard)
+  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
   findOne(@Param("id") id: number) {
     return this.labService.findOne(id);

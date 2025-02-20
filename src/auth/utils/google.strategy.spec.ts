@@ -77,8 +77,7 @@ describe("GoogleStrategy", () => {
         email: "testuser@example.com",
         firstName: "Test",
         lastName: "User",
-        profile_img: "http://photo.url",
-        nickName: null,
+        profileImg: "http://photo.url",
       });
       expect(done).toHaveBeenCalledWith(null, user);
     });

@@ -4,7 +4,7 @@ import { User } from "src/entities/user.entity";
 import { ActivedLabController } from "./actived-lab.controller";
 import { ActivedLabService } from "./actived-lab.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { ActivatedLab } from "src/entities/actived-lab.entity";
+import { ActivedLab } from "src/entities/actived-lab.entity";
 import { ConfigModule } from "@nestjs/config";
 import dockerConfig from "src/config/docker-api.config";
 import { UserService } from "src/user/user.service";
@@ -18,7 +18,7 @@ import { HttpModule } from "@nestjs/axios";
   imports: [
     HttpModule,
     TypeOrmModule.forFeature([
-      ActivatedLab,
+      ActivedLab,
       Lab,
       User,
       Student,
