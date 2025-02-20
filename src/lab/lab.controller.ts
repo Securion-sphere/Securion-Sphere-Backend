@@ -28,7 +28,7 @@ export class LabController {
     @Req() req: { user: { id: number } },
     @Body() createLabDto: CreateLabDto,
   ) {
-    return this.labService.create({ userId: req.user.id, ...createLabDto });
+    return this.labService.create(createLabDto);
   }
 
   @Get()
