@@ -90,7 +90,7 @@ export class UserController {
 
   @Get("profile/:id")
   @ApiBearerAuth("access-token")
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtAuthGuard, SupervisorGuard)
   findOne(@Param("id") id: string) {
     return this.userService.findOne(+id);
   }

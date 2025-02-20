@@ -258,44 +258,46 @@ export class UserService {
         "user.firstName",
         "user.lastName",
         "user.nickName",
-        "user.profile_img",
+        "user.profileImg",
         "user.email",
+        "supervisor.user_id",
         "student",
         "solvation",
         "solvedLab.id",
         "solvedLab.name",
         "solvedLab.category",
         "solvedLab.point",
-        "supervisor",
       ])
       .getMany();
 
     return users.map((user) => {
-      if (user) {
-        if (!user.student) {
-          delete user.student;
-        }
-        if (!user.supervisor) {
-          delete user.supervisor;
-        }
+      if (user.supervisor) {
+        return {
+          ...user,
+          role: "supervisor",
+          supervisor: undefined,
+          student: undefined,
+        };
+      } else if (user.student) {
+        const totalScore =
+          user.student?.solved_lab?.reduce((score, solvation) => {
+            return score + (solvation.lab?.point || 0);
+          }, 0) || 0;
+        return {
+          ...user,
+          role: "student",
+          student: {
+            score: totalScore,
+            solvedLab: user.student.solved_lab ?? [],
+          },
+          supervisor: undefined,
+        };
       }
-
-      const totalScore =
-        user.student?.solved_lab?.reduce((score, solvation) => {
-          return score + (solvation.lab?.point || 0);
-        }, 0) || 0;
-
       return {
         ...user,
-        supervisor: user.supervisor,
-        ...(user.student
-          ? {
-              student: {
-                score: totalScore,
-                solved_lab: user.student.solved_lab,
-              },
-            }
-          : {}),
+        supervisor: undefined,
+        student: undefined,
+        role: "who_are_you?",
       };
     });
   }
@@ -341,47 +343,46 @@ export class UserService {
         "user.firstName",
         "user.lastName",
         "user.nickName",
-        "user.profile_img",
+        "user.profileImg",
         "user.email",
+        "supervisor.user_id",
         "student",
         "solvation",
         "solvedLab.id",
         "solvedLab.name",
         "solvedLab.category",
         "solvedLab.point",
-        "supervisor",
       ])
       .where("user.id = :id", { id })
       .getOne();
 
-    if (user) {
-      if (!user.student) {
-        delete user.student;
-      }
-      if (!user.supervisor) {
-        delete user.supervisor;
-      }
-    } else {
-      throw new NotFoundException("User is not found");
+    if (user.supervisor) {
+      return {
+        ...user,
+        role: "supervisor",
+        supervisor: undefined,
+        student: undefined,
+      };
+    } else if (user.student) {
+      const totalScore =
+        user.student?.solved_lab?.reduce((score, solvation) => {
+          return score + (solvation.lab?.point || 0);
+        }, 0) || 0;
+      return {
+        ...user,
+        role: "student",
+        student: {
+          score: totalScore,
+          solvedLab: user.student.solved_lab ?? [],
+        },
+        supervisor: undefined,
+      };
     }
-
-    const totalScore =
-      user.student?.solved_lab?.reduce(
-        (score, solvation) => score + (solvation.lab?.point || 0),
-        0,
-      ) || 0;
-
     return {
       ...user,
-      ...(user.supervisor ? { supervisor: user.supervisor } : {}),
-      ...(user.student
-        ? {
-            student: {
-              score: totalScore,
-              solved_lab: user.student.solved_lab,
-            },
-          }
-        : {}),
+      supervisor: undefined,
+      student: undefined,
+      role: "who_are_you?",
     };
   }
 
