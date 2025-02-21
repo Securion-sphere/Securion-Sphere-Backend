@@ -3,10 +3,10 @@ import { User } from "./user.entity";
 
 @Entity()
 export class Supervisor {
-  @PrimaryColumn({ type: "int", nullable: false })
-  user_id: number;
+  @PrimaryColumn({ name: "user_id", type: "int", nullable: false })
+  userId: number;
 
-  @OneToOne(() => User, (user) => user.student, {
+  @OneToOne(() => User, (user) => user.supervisor, {
     onDelete: "CASCADE",
     onUpdate: "CASCADE",
   })

@@ -34,8 +34,13 @@ export class LabService {
     return this.labRepository.save(newLab);
   }
 
-  async findAll() {
-    const labs = await this.labRepository
+  async findAll(userId: number) {
+    const { student, supervisor } = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ["student", "supervisor"],
+    });
+
+    const query = this.labRepository
       .createQueryBuilder("lab")
       .leftJoinAndSelect("lab.solvedBy", "solvation")
       .leftJoinAndSelect("solvation.student", "student")
@@ -48,15 +53,22 @@ export class LabService {
         "lab.category",
         "lab.isReady",
         "solvation.solvedAt",
-        "student.user_id",
+        "student.userId",
         "user.id",
         "user.firstName",
         "user.lastName",
         "user.nickName",
         "user.email",
         "user.profileImg",
-      ])
-      .getMany();
+      ]);
+
+    let labs: Lab[];
+
+    if (supervisor) {
+      labs = await query.getMany();
+    } else if (student) {
+      labs = await query.where("lab.isReady = true").getMany();
+    }
 
     return labs.map((lab) => ({
       id: lab.id,
@@ -64,6 +76,7 @@ export class LabService {
       description: lab.description,
       point: lab.point,
       category: lab.category,
+      isReady: supervisor ? lab.isReady : undefined,
       solvedBy: lab.solvedBy.map((solvation) => ({
         user: solvation.student.user
           ? {
@@ -80,12 +93,17 @@ export class LabService {
     }));
   }
 
-  async findOne(id: number) {
-    const lab = await this.labRepository
+  async findOne(userId: number, labId: number) {
+    const { student, supervisor } = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ["student", "supervisor"],
+    });
+
+    const query = this.labRepository
       .createQueryBuilder("lab")
       .leftJoinAndSelect("lab.solvedBy", "solvation")
       .leftJoinAndSelect("solvation.student", "student")
-      .leftJoinAndSelect("student.user", "user") // This makes sure user is joined through student
+      .leftJoinAndSelect("student.user", "user")
       .select([
         "lab.id",
         "lab.name",
@@ -94,16 +112,23 @@ export class LabService {
         "lab.category",
         "lab.isReady",
         "solvation.solvedAt",
-        "student.user_id",
+        "student.userId",
         "user.id",
         "user.firstName",
         "user.lastName",
         "user.nickName",
         "user.email",
         "user.profileImg",
-      ])
-      .where("lab.id = :id", { id })
-      .getOne();
+      ]);
+
+    let lab: Lab;
+    if (supervisor) {
+      lab = await query.where("lab.id = :labId", { labId }).getOne();
+    } else if (student) {
+      lab = await query
+        .where("lab.id = :labId AND lab.isReady = true", { labId })
+        .getOne();
+    }
 
     if (!lab) {
       throw new NotFoundException("Lab not found");
@@ -115,6 +140,7 @@ export class LabService {
       description: lab.description,
       point: lab.point,
       category: lab.category,
+      isReady: supervisor ? lab.isReady : undefined,
       solvedBy: lab.solvedBy.map((solvation) => ({
         user: solvation.student.user
           ? {

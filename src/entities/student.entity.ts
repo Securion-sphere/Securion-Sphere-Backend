@@ -10,8 +10,8 @@ import { Solvation } from "./solvation.entity";
 
 @Entity()
 export class Student {
-  @PrimaryColumn({ type: "int", nullable: false })
-  user_id: number;
+  @PrimaryColumn({ name: "user_id", type: "int", nullable: false })
+  userId: number;
 
   @OneToOne(() => User, (user) => user.student, {
     onDelete: "CASCADE",

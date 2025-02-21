@@ -24,25 +24,22 @@ export class LabController {
   @Post()
   @UseGuards(JwtAuthGuard, SupervisorGuard)
   @ApiBearerAuth("access-token")
-  create(
-    @Req() req: { user: { id: number } },
-    @Body() createLabDto: CreateLabDto,
-  ) {
+  create(@Body() createLabDto: CreateLabDto) {
     return this.labService.create(createLabDto);
   }
 
   @Get()
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
-  findAll() {
-    return this.labService.findAll();
+  findAll(@Req() req: { user: { id: number } }) {
+    return this.labService.findAll(req.user.id);
   }
 
   @Get(":id")
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
-  findOne(@Param("id") id: number) {
-    return this.labService.findOne(id);
+  findOne(@Req() req: { user: { id: number } }, @Param("id") id: number) {
+    return this.labService.findOne(req.user.id, id);
   }
 
   @Patch(":id")
