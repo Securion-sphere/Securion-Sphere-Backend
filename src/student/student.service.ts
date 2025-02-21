@@ -12,7 +12,7 @@ export class StudentService {
 
   async findAll() {
     const students = await this.studentRepository.find({
-      relations: ["user", "solved_lab", "solved_lab.lab"],
+      relations: ["user", "solvedLab", "solvedLab.lab"],
       select: {
         user: {
           id: true,
@@ -46,7 +46,7 @@ export class StudentService {
   async findOne(studentId: number) {
     const student = await this.studentRepository.findOne({
       where: { user: { id: studentId } },
-      relations: ["user", "solved_lab", "solved_lab.lab"],
+      relations: ["user", "solvedLab", "solvedLab.lab"],
       select: {
         user: {
           id: true,
