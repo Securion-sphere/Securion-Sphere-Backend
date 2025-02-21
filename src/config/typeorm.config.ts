@@ -11,13 +11,13 @@ export default registerAs("typeorm", () => ({
   database: process.env.DB_NAME,
 
   // For your local development only
-  // entities: [__dirname + "/../**/*.entity{.ts,.js}"],
-  // synchronize: true,
+  entities: [__dirname + "/../**/*.entity{.ts,.js}"],
+  synchronize: true,
 
   // For deployed environment
-  entities: ["dist/**/*.entity{.ts,.js}"],
-  migrations: ["dist/migrations/*{.ts,.js}"],
-  synchronize: false,
+  // entities: ["dist/**/*.entity{.ts,.js}"],
+  // migrations: ["dist/migrations/*{.ts,.js}"],
+  // synchronize: false,
 }));
 
 config({ path: [".env.local", ".env"] });
