@@ -20,11 +20,19 @@ import { SupervisorGuard } from "./guards/role.guard";
 import { AddEmailsDto } from "./dto/add-email.dto";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { BulkUploadDto } from "./dto/bulk-upload.dto";
+import { Request } from "express";
 
 @Controller("user")
 @ApiTags("user")
 export class UserController {
   constructor(private readonly userService: UserService) {}
+
+  @Get()
+  @ApiBearerAuth("access-token")
+  @UseGuards(JwtAuthGuard)
+  findAll() {
+    return this.userService.findAll();
+  }
 
   @Post()
   @ApiBearerAuth("access-token")
@@ -35,16 +43,10 @@ export class UserController {
 
   @Post("email-add")
   @ApiBearerAuth("access-token")
+  @ApiTags("user/pre-login")
   @UseGuards(JwtAuthGuard, SupervisorGuard)
   async addEmails(@Body() addEmailsDto: AddEmailsDto) {
     return this.userService.addEmails(addEmailsDto);
-  }
-
-  @Get()
-  @ApiBearerAuth("access-token")
-  @UseGuards(JwtAuthGuard)
-  findAll() {
-    return this.userService.findAll();
   }
 
   @Post("bulk-add-csv")
@@ -52,6 +54,7 @@ export class UserController {
   @UseGuards(JwtAuthGuard, SupervisorGuard)
   @ApiConsumes("multipart/form-data")
   @UseInterceptors(FileInterceptor("file"))
+  @ApiTags("user/pre-login")
   async bulkAddUsersFromCsv(
     @UploadedFile() file: Express.Multer.File,
     @Body() bulkUploadDto: BulkUploadDto,
@@ -60,13 +63,22 @@ export class UserController {
   }
 
   @Get("pre-login")
+  @ApiTags("user/pre-login")
   @ApiBearerAuth("access-token")
   @UseGuards(JwtAuthGuard, SupervisorGuard)
   findAllPreLoginUser() {
     return this.userService.findAllPreLoginUser();
   }
 
+  // @Delete("openvpn")
+  // @ApiBearerAuth("access-token")
+  // @UseGuards(JwtAuthGuard)
+  // revokeCert(@Req() req: Request & { user: { id: number } }) {
+  //   return this.userService.revokeCert(req.user.id, req.headers.authorization);
+  // }
+
   @Delete("pre-login/:email")
+  @ApiTags("user/pre-login")
   @ApiBearerAuth("access-token")
   @UseGuards(JwtAuthGuard, SupervisorGuard)
   RemovePreLoginUser(@Param("email") email: string) {
@@ -118,4 +130,24 @@ export class UserController {
   remove(@Param("id") id: string) {
     return this.userService.remove(+id);
   }
+
+  @Get("openvpn")
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth("access-token")
+  getOpenVPNFile(@Req() req: Request & { user: { id: number } }) {
+    return this.userService.getOpenVPNFile(
+      req.user.id,
+      req.headers.authorization,
+    );
+  }
+
+  // @Post("openvpn")
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth("access-token")
+  // generateCert(@Req() req: Request & { user: { id: number } }) {
+  //   return this.userService.generateCert(
+  //     req.user.id,
+  //     req.headers.authorization,
+  //   );
+  // }
 }

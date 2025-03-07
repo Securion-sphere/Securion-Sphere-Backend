@@ -4,7 +4,6 @@ import { ConfigModule } from "@nestjs/config";
 import googleOauthConfig from "src/config/google-oauth.config";
 import { GoogleStrategy } from "./utils/google.strategy";
 import { AuthService } from "./auth.service";
-import { UserService } from "src/user/user.service";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { User } from "src/entities/user.entity";
 import { JwtModule } from "@nestjs/jwt";
@@ -14,6 +13,7 @@ import { RefreshJwtStrategy } from "./utils/refresh.strategy";
 import { Student } from "src/entities/student.entity";
 import { Supervisor } from "src/entities/supervisor.entity";
 import { PreLoginUser } from "src/entities/pre-login-user.entity";
+import { UserModule } from "src/user/user.module";
 
 @Module({
   imports: [
@@ -22,14 +22,9 @@ import { PreLoginUser } from "src/entities/pre-login-user.entity";
     ConfigModule.forFeature(refreshJwtConfig),
     TypeOrmModule.forFeature([User, Student, Supervisor, PreLoginUser]),
     JwtModule.registerAsync(jwtConfig.asProvider()),
+    UserModule,
   ],
   controllers: [AuthController],
-  providers: [
-    GoogleStrategy,
-    AuthService,
-    UserService,
-    JwtStrategy,
-    RefreshJwtStrategy,
-  ],
+  providers: [GoogleStrategy, AuthService, JwtStrategy, RefreshJwtStrategy],
 })
 export class AuthModule {}

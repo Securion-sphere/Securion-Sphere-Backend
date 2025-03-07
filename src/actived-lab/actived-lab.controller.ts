@@ -61,7 +61,7 @@ export class ActivedLabController {
   @Get("get-instance")
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth("access-token")
-  async getInstance(@Req() req: { user: { id: number } }) {
+  async getInstance(@Req() req: Request & { user: { id: number } }) {
     return this.activedLabService.getInstance(req.user.id);
   }
 }

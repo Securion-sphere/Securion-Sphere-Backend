@@ -3,7 +3,7 @@ import { CreateUserDto } from "./dto/create-user.dto";
 import { UpdateUserDto } from "./dto/update-user.dto";
 import { Repository } from "typeorm";
 import { User } from "src/entities/user.entity";
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { HttpException, Injectable, NotFoundException } from "@nestjs/common";
 import { Student } from "src/entities/student.entity";
 import { Supervisor } from "src/entities/supervisor.entity";
 import { Role } from "./types/role";
@@ -12,6 +12,10 @@ import { AddEmailsDto } from "./dto/add-email.dto";
 import { PreLoginUser } from "src/entities/pre-login-user.entity";
 import { PreLoginUserDto } from "./dto/pre-login-user.dto";
 import { Readable } from "stream";
+import { ConfigService } from "@nestjs/config";
+import { HttpService } from "@nestjs/axios";
+import { catchError, lastValueFrom } from "rxjs";
+import { AxiosError } from "axios";
 
 @Injectable()
 export class UserService {
@@ -24,6 +28,9 @@ export class UserService {
     private readonly supervisorRepo: Repository<Supervisor>,
     @InjectRepository(PreLoginUser)
     private readonly preLoginUserRepo: Repository<PreLoginUser>,
+
+    private readonly configService: ConfigService,
+    private readonly httpService: HttpService,
   ) {}
 
   private async parseCSV(file: Express.Multer.File): Promise<string[]> {
@@ -423,5 +430,117 @@ export class UserService {
 
   async updateHashedRefreshToken(userId: number, hashedRefreshToken: string) {
     return this.userRepository.update({ id: userId }, { hashedRefreshToken });
+  }
+
+  async getOpenVPNFile(userId: number, token: string) {
+    const openVPNUrl = this.configService.get<string>("ovpnApi.url");
+
+    const { firstName } = await this.userRepository.findOneByOrFail({
+      id: userId,
+    });
+
+    await lastValueFrom(
+      this.httpService
+        .get(`${openVPNUrl}/easyrsa/${firstName}`, {
+          headers: { Authorization: token },
+        })
+        .pipe(
+          catchError(async (error: AxiosError) => {
+            const status = error.response?.status || 500;
+            const message = error.response?.data || "Internal server error";
+            if (status === 404) {
+              try {
+                await this.generateCert(userId, token);
+              } catch (generateError) {
+                throw new HttpException(
+                  {
+                    msg: "Failed to generate certificate",
+                    error: generateError.message,
+                  },
+                  generateError.response?.status || 500,
+                );
+              }
+            } else {
+              throw new HttpException(
+                { msg: "Failed to check client certificate", error: message },
+                status,
+              );
+            }
+          }),
+        ),
+    );
+
+    const { data } = await lastValueFrom(
+      this.httpService
+        .get(`${openVPNUrl}/openvpn/${firstName}`, {
+          headers: { Authorization: token },
+        })
+        .pipe(
+          catchError((error: AxiosError) => {
+            const status = error.response?.status || 500;
+            const message = error.response?.data || "Internal server error";
+            throw new HttpException(
+              { msg: "Failed to get ovpn file", error: message },
+              status,
+            );
+          }),
+        ),
+    );
+
+    return data;
+  }
+
+  async generateCert(userId: number, token: string) {
+    const openVPNUrl = this.configService.get<string>("ovpnApi.url");
+
+    const { firstName } = await this.userRepository.findOneByOrFail({
+      id: userId,
+    });
+
+    const { data } = await lastValueFrom(
+      this.httpService
+        .post(
+          `${openVPNUrl}/easyrsa/${firstName}`,
+          {},
+          {
+            headers: { Authorization: token },
+          },
+        )
+        .pipe(
+          catchError((error: AxiosError) => {
+            const status = error.response?.status || 500;
+            const message = error.response?.data || "Internal server error";
+            console.log(message);
+            throw new HttpException({ error: message }, status);
+          }),
+        ),
+    );
+
+    return data;
+  }
+
+  async revokeCert(userId: number, token: string) {
+    const openVPNUrl = this.configService.get<string>("ovpnApi.url");
+
+    const { firstName } = await this.userRepository.findOneByOrFail({
+      id: userId,
+    });
+
+    const { data } = await lastValueFrom(
+      this.httpService
+        .delete(`${openVPNUrl}/easyrsa/${firstName}`, {
+          headers: { Authorization: token },
+        })
+        .pipe(
+          catchError((error: AxiosError) => {
+            const status = error.response?.status || 500;
+            const message = error.response?.data || "Internal server error";
+            console.log(message);
+            throw new HttpException({ error: message }, status);
+          }),
+        ),
+    );
+
+    return data;
   }
 }
