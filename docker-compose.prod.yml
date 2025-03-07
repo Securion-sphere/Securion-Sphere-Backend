@@ -9,7 +9,7 @@ services:
       securion-pg:
         condition: service_healthy
         restart: true
-      securion-minio:
+      securion-storage:
         condition: service_healthy
         restart: true
     restart: unless-stopped
