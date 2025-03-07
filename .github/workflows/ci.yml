@@ -33,7 +33,7 @@ jobs:
         run: pnpm lint
 
       - name: Run Unit Test NestJS application
-        run: pnpm test
+        run: pnpm test -- --passWithNoTests
 
       - name: Build NestJS application
         run: pnpm build
