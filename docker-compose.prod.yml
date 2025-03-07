@@ -6,7 +6,7 @@ services:
     image: securion-backend
     container_name: securion-backend
     depends_on:
-      securion-pg:
+      securion-db:
         condition: service_healthy
         restart: true
       securion-storage:
