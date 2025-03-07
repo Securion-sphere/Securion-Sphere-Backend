@@ -1,0 +1,63 @@
+services:
+  securion-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: securion-backend
+    container_name: securion-backend
+    depends_on:
+      securion-pg:
+        condition: service_healthy
+        restart: true
+      securion-minio:
+        condition: service_healthy
+        restart: true
+    restart: unless-stopped
+    ports:
+      - 5000:5000
+    networks:
+      - securion-backend
+      - securion-frontend
+    environment:
+      - APP_PORT
+      - DB_HOST
+      - DB_USER
+      - DB_PASSWORD
+      - DB_NAME
+      - DB_PORT
+      - DOCKER_API_HOST
+      - DOCKER_API_URL
+      - OPENVPN_API_URL
+      - MINIO_ACCESS_KEY
+      - MINIO_SECRET_KEY
+      - MINIO_ENDPOINT
+      - MINIO_DEFAULT_BUCKET
+      - MINIO_REGION
+      - CLIENT_ID
+      - CLIENT_SECRET
+      - CALLBACK_URL
+      - JWT_SECRET
+      - JWT_EXPIRE_IN
+      - REFRESH_JWT_SECRET
+      - REFRESH_JWT_EXPIRE_IN
+      - NODE_ENV="development"
+      - FRONTEND_URL
+      - TZ
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl --fail http://localhost:${APP_PORT}/health || exit 1",
+        ]
+      interval: 30s
+      retries: 3
+      start_period: 30s
+      timeout: 10s
+
+networks:
+  securion-backend:
+    name: securion-backend
+    external: true
+  securion-frontend:
+    name: securion-frontend
+    driver: bridge

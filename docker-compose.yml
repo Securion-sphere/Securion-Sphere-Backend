@@ -1,35 +1,40 @@
 services:
-  securion-sphere-backend:
+  securion-backend:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: securion-sphere-backend
+    image: securion-backend
+    container_name: securion-backend
+    depends_on:
+      securion-db:
+        condition: service_healthy
+        restart: true
+      securion-storage:
+        condition: service_healthy
+        restart: true
     restart: unless-stopped
-    ports:
-      - ${APP_PORT}:${APP_PORT}
     networks:
-      - network-backend
+      - securion-backend
+      - securion-frontend
     env_file:
-      - .env
-  postgres:
-    image: postgres
-    container_name: postgres
-    restart: unless-stopped
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
+      - .env.local
     ports:
-      - 5432:5432
-    networks:
-      - network-backend
+      - 5001:5000
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "curl --fail http://localhost:${APP_PORT}/health || exit 1",
+        ]
+      interval: 30s
+      retries: 3
+      start_period: 30s
+      timeout: 10s
 
 networks:
-  network-backend:
+  securion-backend:
+    name: securion-backend
+    external: true
+  securion-frontend:
+    name: securion-frontend
     driver: bridge
-    name: network-backend
-
-volumes:
-  postgres_data:

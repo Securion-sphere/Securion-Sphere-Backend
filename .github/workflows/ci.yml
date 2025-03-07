@@ -1,0 +1,39 @@
+name: Run Lint Test and Build
+
+on:
+  pull_request:
+    branches: ["main", "dev"]
+  push:
+    branches: ["main", "dev", "feat/*", "test/*", "fix/*", "chore/*"]
+
+jobs:
+  lint-test-build:
+    name: Lint Test and Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Prepare pnpm from package.json
+        run: corepack prepare --activate
+
+      - name: Enable Corepack
+        run: corepack enable
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Lint NestJS application
+        run: pnpm lint
+
+      - name: Run Unit Test NestJS application
+        run: pnpm test -- --passWithNoTests
+
+      - name: Build NestJS application
+        run: pnpm build

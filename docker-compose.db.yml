@@ -1,0 +1,50 @@
+services:
+  securion-db:
+    image: postgres
+    container_name: securion-db
+    restart: unless-stopped
+    volumes:
+      - securion-db-data:/var/lib/postgresql/data
+    env_file:
+      - .env.db
+    ports:
+      - 5432:5432
+    networks:
+      - securion-backend
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "$${DB_USER}"]
+      interval: 30s
+      retries: 3
+      start_period: 30s
+      timeout: 30s
+
+  securion-storage:
+    image: quay.io/minio/minio
+    container_name: securion-storage
+    restart: unless-stopped
+    ports:
+      - 9000:9000
+      - 9090:9090
+    volumes:
+      - securion-storage-data:/data
+    networks:
+      - securion-backend
+    env_file:
+      - .env.storage
+    command: server /data --console-address ":9090"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+networks:
+  securion-backend:
+    name: securion-backend
+    driver: bridge
+
+volumes:
+  securion-db-data:
+    name: securion-db-data
+  securion-storage-data:
+    name: securion-storage-data
