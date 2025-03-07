@@ -1,0 +1,48 @@
+name: Deploy dev to Self-Hosted
+
+on:
+  workflow_run:
+    workflows: ["Run Lint Test and Build"]
+    branches: ["dev"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    name: Deploy to dev
+    runs-on: ["self-hosted", "pau-proj-dev"]
+    environment: dev
+    steps:
+      - name: Copy repository
+        uses: actions/checkout@v4
+
+      - name: Build the docker-compose stack
+        run: docker compose -f docker-compose.dev.yml up -d --build
+        env:
+          DB_HOST: ${{ vars.DB_HOST }}
+          DB_PORT: ${{ vars.DB_PORT }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+          MINIO_ACCESS_KEY: ${{ secrets.MINIO_ACCESS_KEY }}
+          MINIO_SECRET_KEY: ${{ secrets.MINIO_SECRET_KEY }}
+          MINIO_ENDPOINT: ${{ vars.MINIO_ENDPOINT }}
+          MINIO_DEFAULT_BUCKET: ${{ vars.MINIO_DEFAULT_BUCKET }}
+          MINIO_REGION: ${{ vars.MINIO_REGION }}
+          DOCKER_API_HOST: ${{ vars.DOCKER_API_HOST }}
+          DOCKER_API_URL: ${{ vars.DOCKER_API_URL }}
+          OPENVPN_API_URL: ${{ vars.OPENVPN_API_URL }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          JWT_EXPIRE_IN: ${{ vars.JWT_EXPIRE_IN }}
+          REFRESH_JWT_SECRET: ${{ secrets.REFRESH_JWT_SECRET }}
+          REFRESH_JWT_EXPIRE_IN: ${{ vars.REFRESH_JWT_EXPIRE_IN }}
+          CLIENT_ID: ${{ secrets.CLIENT_ID }}
+          CLIENT_SECRET: ${{ secrets.CLIENT_SECRET }}
+          CALLBACK_URL: ${{ vars.CALLBACK_URL }}
+          FRONTEND_URL: ${{ vars.FRONTEND_URL }}
+          TZ: ${{ vars.TZ }}
+          APP_PORT: ${{ vars.APP_PORT }}
+
+      - name: Clear all docker unused cache
+        run: docker system prune -af

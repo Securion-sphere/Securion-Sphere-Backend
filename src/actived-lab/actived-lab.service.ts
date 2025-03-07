@@ -216,18 +216,6 @@ export class ActivedLabService {
       throw new NotFoundException("User haven't create instance yet");
     }
 
-    return {
-      instanceId: instance.id,
-      instanceOwner: {
-        id: instance.instanceOwner.id,
-        nick_name: instance.instanceOwner.nickName,
-      },
-      instanceLab: {
-        id: instance.instanceLab.id,
-        name: instance.instanceLab.name,
-      },
-      ip: instance.ip,
-      port: instance.port,
-    };
+    return instance;
   }
 }

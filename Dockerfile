@@ -1,5 +1,5 @@
 # Base stage (Common dependencies)
-FROM node:20-alpine AS base
+FROM node:lts-alpine AS base
 WORKDIR /app
 RUN apk add --no-cache libc6-compat curl
 RUN npm install -g corepack

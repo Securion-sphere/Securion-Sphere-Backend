@@ -25,12 +25,11 @@ export class SupervisorGuard implements CanActivate {
     }
 
     const supervisor = await this.supervisorRepository.findOne({
-      where: { user: { id: userId } }, // Query the related User entity
-      relations: ["user"], // Ensure the `user` relation is loaded
+      where: { userId },
     });
 
     if (!supervisor) {
-      throw new ForbiddenException("Access denied. User is not a supervisor.");
+      throw new ForbiddenException("Access denied. User is not a supervisor");
     }
 
     return true; // Allow access if the user is a supervisor

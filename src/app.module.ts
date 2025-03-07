@@ -13,7 +13,6 @@ import { StudentModule } from "./student/student.module";
 import { HealthModule } from "./health/health.module";
 import { TerminusModule } from "@nestjs/terminus";
 import * as config from "./config";
-import * as Joi from "joi";
 
 @Module({
   imports: [
@@ -21,11 +20,6 @@ import * as Joi from "joi";
     ConfigModule.forRoot({
       load: [...Object.values(config)],
       envFilePath: [".env.local", ".env"],
-      validationSchema: Joi.object({
-        NODE_ENV: Joi.string()
-          .valid("development", "production", "test", "provision")
-          .default("development"),
-      }),
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

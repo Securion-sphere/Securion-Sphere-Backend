@@ -10,8 +10,13 @@ async function bootstrap() {
   const configService = app.get<ConfigService>(ConfigService);
   const nodeEnv = configService.get<string>("app.nodeEnv");
 
+  const allowedOrigins =
+    nodeEnv !== "development"
+      ? [`${configService.get<string>("app.frontendUrl")}`, "localhost:3000"]
+      : [`${configService.get<string>("app.frontendUrl")}`];
+
   app.enableCors({
-    origin: `${configService.get<string>("app.frontendUrl")}`,
+    origin: allowedOrigins,
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -25,11 +30,11 @@ async function bootstrap() {
     }),
   );
 
-  if (nodeEnv !== "production") {
+  if (nodeEnv === "development") {
     const swaggerConfig = new DocumentBuilder()
       .setTitle("SecurionSphere API")
       .setDescription("SecurionSphere API")
-      .setVersion("1.1")
+      .setVersion("1.2")
       .addBearerAuth(
         {
           type: "http",
@@ -62,4 +67,5 @@ async function bootstrap() {
   const port = configService.get<number>("app.port");
   await app.listen(port);
 }
-bootstrap();
+
+void bootstrap();
