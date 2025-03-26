@@ -37,7 +37,7 @@ export class HealthController {
       async () =>
         this.http.pingCheck(
           "minio",
-          `http://${this.configService.get<string>("minio.host")}:${this.configService.get<number>("minio.port")}/minio/health/live`,
+          `http://${this.configService.get<string>("minio.endpoint")}/minio/health/live`,
         ),
     ]);
   }

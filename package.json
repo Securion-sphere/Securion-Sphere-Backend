@@ -1,6 +1,6 @@
 {
   "name": "securion-sphere-backend",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "description": "",
   "author": "",
   "private": true,
@@ -46,7 +46,7 @@
     "@nestjs/terminus": "^10.2.3",
     "@nestjs/typeorm": "^10.0.2",
     "argon2": "^0.41.1",
-    "axios": "^1.7.7",
+    "axios": "^1.8.3",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "csv-parse": "^5.6.0",
