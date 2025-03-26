@@ -44,7 +44,7 @@ export class ActivedLabService {
   ) {
     const port = randomInt(40000, 50001);
     const ip = this.configService.get<string>("dockerApi.host");
-    const flag = "flag{" + randomBytes(48).toString("hex") + "}";
+    const flag = "flag{" + randomBytes(16).toString("hex") + "}";
     const owner = await this.userRepository.findOneBy({
       id: createLabInstanceDto.userId,
     });
@@ -182,28 +182,31 @@ export class ActivedLabService {
       throw new NotFoundException("User haven't create instance yet");
     }
 
-    if (activatedLab.flag === flag) {
-      if (!activatedLab.instanceOwner.student) {
-        return {
-          msg: "Flag is correct, but you are a Supervisor. The record will not be stored.",
-        };
-      }
-
-      try {
-        const solvation = this.solvationRepository.create({
-          student: activatedLab.instanceOwner.student,
-          lab: activatedLab.instanceLab,
-          solvedAt: new Date(),
-        });
-        await this.solvationRepository.save(solvation);
-      } catch (err) {
-        throw new InternalServerErrorException("Cannot save the record");
-      }
-
-      return { msg: "Flag is correct" };
-    } else {
+    const isCorrectFlag = activatedLab.flag === flag;
+    if (!isCorrectFlag) {
       return { msg: "Flag is not correct" };
     }
+
+    if (!owner.student) {
+      return {
+        msg: "Flag is correct, but you are a Supervisor. The record will not be stored",
+      };
+    }
+
+    try {
+      const solvation = this.solvationRepository.create({
+        student: owner.student,
+        lab: activatedLab.instanceLab,
+        solvedAt: new Date(),
+      });
+      await this.solvationRepository.save(solvation);
+    } catch (err) {
+      throw new InternalServerErrorException(
+        "Cannot save the record. Please try again",
+      );
+    }
+
+    return { msg: "Flag is correct" };
   }
 
   async getInstance(id: number) {
