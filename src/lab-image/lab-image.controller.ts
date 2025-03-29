@@ -42,7 +42,7 @@ export class LabImageController {
 
   @Get(":id")
   @UseGuards(JwtAuthGuard, SupervisorGuard)
-  findOne(@Param("id") id: string, @Req() req: Request) {
+  findOne(@Req() req: Request, @Param("id") id: number) {
     return this.labImageService.findOne(req.headers.authorization, id);
   }
 
@@ -54,7 +54,7 @@ export class LabImageController {
 
   @Delete(":id")
   @UseGuards(JwtAuthGuard, SupervisorGuard)
-  remove(@Req() req: Request, @Param("id") id: string) {
+  remove(@Req() req: Request, @Param("id") id: number) {
     return this.labImageService.remove(req.headers.authorization, id);
   }
 }

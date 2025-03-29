@@ -70,11 +70,18 @@ export class LabImageService {
     return this.labImageRepository.find();
   }
 
-  async findOne(token: string, id: string) {
+  async findOne(token: string, id: number) {
+    const image = await this.labImageRepository.findOne({
+      where: { id },
+    });
+    if (!image) {
+      throw new NotFoundException({ msg: "Image not found" });
+    }
+
     try {
       await lastValueFrom(
         this.httpService
-          .get(`${this.dockerApiUrl}/image/${id}`, {
+          .get(`${this.dockerApiUrl}/image/${image.imageId}`, {
             headers: { Authorization: token },
           })
           .pipe(
@@ -90,26 +97,21 @@ export class LabImageService {
       throw new InternalServerErrorException(err);
     }
 
+    return image;
+  }
+
+  async remove(token: string, id: number) {
     const image = await this.labImageRepository.findOne({
-      where: { imageId: id },
+      where: { id },
     });
     if (!image) {
       throw new NotFoundException({ msg: "Image not found" });
     }
 
-    return image;
-  }
-
-  async remove(token: string, id: string) {
-    const lab = await this.findOne(token, id);
-    if (!lab) {
-      throw new NotFoundException();
-    }
-
     try {
       await lastValueFrom(
         this.httpService
-          .delete(`${this.dockerApiUrl}/image/${lab.imageId}`, {
+          .delete(`${this.dockerApiUrl}/image/${image.imageId}`, {
             headers: { Authorization: token },
           })
           .pipe(
@@ -122,6 +124,6 @@ export class LabImageService {
       throw new InternalServerErrorException(err);
     }
 
-    return this.labImageRepository.remove(lab);
+    return this.labImageRepository.remove(image);
   }
 }
