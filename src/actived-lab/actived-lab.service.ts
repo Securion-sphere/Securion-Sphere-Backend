@@ -213,6 +213,19 @@ export class ActivedLabService {
     const user = await this.userRepository.findOneBy({ id });
     const instance = await this.activeLabRepository.findOne({
       where: { instanceOwner: user },
+      select: {
+        id: true,
+        containerId: true,
+        ip: true,
+        port: true,
+        instanceLab: {
+          id: true,
+          name: true,
+          category: true,
+          point: true,
+        },
+      },
+      relations: ["instanceLab"],
     });
 
     if (!instance) {

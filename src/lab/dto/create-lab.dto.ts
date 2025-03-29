@@ -1,4 +1,4 @@
-import { IsBoolean, IsNumber, IsString } from "class-validator";
+import { IsNumber, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 export class CreateLabDto {
   @ApiProperty({ type: String })
@@ -20,8 +20,4 @@ export class CreateLabDto {
   @ApiProperty({ type: Number })
   @IsNumber()
   labImageId: number;
-
-  @ApiProperty({ type: Boolean })
-  @IsBoolean()
-  isReady?: boolean = true;
 }
