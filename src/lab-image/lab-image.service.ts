@@ -13,7 +13,7 @@ import { HttpService } from "@nestjs/axios";
 import { ConfigService } from "@nestjs/config";
 import * as FormData from "form-data";
 import { catchError, lastValueFrom, throwError } from "rxjs";
-import { ImageUploadRes } from "./types/imageUpload";
+import { ImageUploadRes } from "./types/image-upload";
 import { AxiosError } from "axios";
 
 @Injectable()
@@ -109,7 +109,7 @@ export class LabImageService {
     try {
       await lastValueFrom(
         this.httpService
-          .delete(`${this.dockerApiUrl}/image/${id}`, {
+          .delete(`${this.dockerApiUrl}/image/${lab.imageId}`, {
             headers: { Authorization: token },
           })
           .pipe(
